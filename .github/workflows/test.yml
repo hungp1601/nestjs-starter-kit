@@ -18,12 +18,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: test
         run: |
-          cd api
           npm ci
           npm run test:cov
       - name: npm run build
         run: |
-          cd api
           npm run build
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
