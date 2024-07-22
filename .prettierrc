@@ -6,7 +6,6 @@
   "jsxSingleQuote": false,
   "bracketSpacing": true,
   "bracketSameLine": false,
-  "arrowParens": "avoid",
   "importOrder": ["^[./]"],
   "importOrderSortSpecifiers": true,
   "importOrderSeparation": true
