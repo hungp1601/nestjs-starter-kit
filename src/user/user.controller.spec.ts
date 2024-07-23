@@ -62,7 +62,6 @@ describe('UserController', () => {
           password: 'p',
         }),
       ).toStrictEqual({
-        message: 'User created',
         user: {
           id: 0,
           token: 'token',
@@ -81,7 +80,6 @@ describe('UserController', () => {
           password: 'p',
         }),
       ).toStrictEqual({
-        message: 'Login successful',
         token: 'mock-token',
       });
     });
@@ -94,7 +92,6 @@ describe('UserController', () => {
         .mockResolvedValue([mockUserEntity]);
 
       expect(await controller.getUsers()).toStrictEqual({
-        message: 'Users retrieved successfully',
         users: [mockUserEntity],
       });
       expect(userServiceSpy).toHaveBeenCalledTimes(1);

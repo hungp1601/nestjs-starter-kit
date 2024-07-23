@@ -9,13 +9,14 @@ const {
 } = getConfig();
 
 export default new DataSource({
-  type: 'postgres',
+  type: 'mysql',
   host,
   port,
   username: user,
   password,
   database: dbName,
+  synchronize: true,
   entities: ['src/**/*.entity.ts'],
   migrations: ['src/**/migrations/*.ts'],
-  subscribers: ['src/**/subscribers/*.ts'],
+  subscribers: ['src/**/subscribers/*.subscriber.ts'],
 });

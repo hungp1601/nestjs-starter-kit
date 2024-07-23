@@ -1,8 +1,12 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import {
   Between,
   DeepPartial,
   Equal,
+  FindOptionsRelationByString,
+  FindOptionsRelations,
+  FindOptionsSelect,
+  FindOptionsSelectByString,
   In,
   LessThan,
   LessThanOrEqual,
@@ -12,23 +16,61 @@ import {
   Not,
   ObjectLiteral,
   Raw,
-  Repository,
 } from 'typeorm';
-import { CompareOperators } from '../types';
+import { CompareOperators, FindOneOperators, WhereOperators } from '../types';
+import { RequestLoggerInterceptor } from 'src/logger/interceptors/request-logger.interceptor';
+import { BaseMysqlRepository } from '../repositories/base-mysql.repository';
 
 export class BaseMysqlService<E extends ObjectLiteral> {
-  constructor(protected repository: Repository<E>) {}
+  public readonly logger = new Logger(RequestLoggerInterceptor.name);
 
+  constructor(protected repository: BaseMysqlRepository<E>) {}
+
+  /**
+   * Finds a record by its ID.
+   * @param id - The ID of the record to find.
+   * @returns A promise that resolves to the found record, or undefined if not found.
+   */
   findOneById(id: string) {
     return this.repository.findOne({
       where: { id: id as any },
     });
   }
 
-  // findOne({ where, join, select }: FindOneOperators<E>) {
-  //   // const whereType = this.convertToWhereTypeORM(where);
-  // }
+  async findOne({
+    where = {},
+    join = [],
+    select = [],
+    withDeleted = false,
+  }: FindOneOperators<E>) {
+    try {
+      const whereType = this.convertToWhereTypeORM(where);
+      const selectType = this.convertFieldsToTypeORM(select);
+      const joinType: FindOptionsRelations<E> | FindOptionsRelationByString =
+        join?.reduce((acc: any, curr) => {
+          acc[curr] = true;
+          return acc;
+        }, {});
 
+      return await this.repository.findOne({
+        where: whereType,
+        relations: joinType,
+        select: selectType,
+        withDeleted,
+      });
+    } catch {
+      this.logger.error('Error finding entity');
+      throw new BadRequestException('Failed to find entity');
+    }
+  }
+
+  /**
+   * Creates a new entity in the database.
+   *
+   * @param entity - The entity to be created.
+   * @returns A promise that resolves to the created entity.
+   * @throws BadRequestException if the entity creation fails.
+   */
   async createOne(entity: DeepPartial<E>): Promise<E> {
     try {
       const e = this.repository.create(entity);
@@ -38,11 +80,19 @@ export class BaseMysqlService<E extends ObjectLiteral> {
       }
       return result;
     } catch {
-      console.error('Error creating entity');
+      this.logger.error('Error creating entity');
       throw new BadRequestException('Failed to create entity');
     }
   }
 
+  /**
+   * Updates an entity by its ID.
+   *
+   * @param id - The ID of the entity to update.
+   * @param entity - The updated entity object.
+   * @returns A promise that resolves to the updated entity, or undefined if the entity was not found.
+   * @throws BadRequestException if the update operation fails.
+   */
   async updateOneById(id: string, entity: E): Promise<E | undefined> {
     try {
       const update = await this.repository.update(
@@ -56,41 +106,53 @@ export class BaseMysqlService<E extends ObjectLiteral> {
 
       return this.repository.save(entity);
     } catch {
-      console.error('Error updating entity');
+      this.logger.error('Error updating entity');
+      throw new BadRequestException('Failed to update entity');
     }
   }
 
-  // convertToWhereTypeORM(where: WhereOperators<E>) {
-  //   const dataFilter = {};
-  //   // TODO: Implement this method, which converts the where object to a format that is compatible with TypeORM
-  //   // Iterate over each item in the filter array
-  //   // where.map(item => {
-  //   //   // Destructure the field, operator, and value from the item
-  //   //   const { field, operator, value }: QueryFilter = item;
-  //   //   // Split the field string into an array of fields
-  //   //   const fields = field.split('.');
-  //   //   // Initialize the currentField to the dataFilter object
-  //   //   let currentField = dataFilter;
-  //   //   // Iterate over the fields array, excluding the last field
-  //   //   // This loop is used to create nested objects in the dataFilter object for each field
-  //   //   for (let i = 0; i < fields.length - 1; i++) {
-  //   //     // If the current field does not exist in the currentField object, initialize it as an empty object
-  //   //     currentField[fields[i]] = currentField[fields[i]] || {};
-  //   //     // Update the currentField to point to the newly created nested object
-  //   //     currentField = currentField[fields[i]];
-  //   //   }
-  //   //   // For the last field in the fields array, call the convertOperatorToTypeORM method
-  //   //   // This method converts the operator and value to a format that is compatible with TypeORM
-  //   //   // The result is assigned to the last field in the currentField object
-  //   //   currentField[fields[fields.length - 1]] = this.convertOperatorToTypeORM({
-  //   //     operator,
-  //   //     value,
-  //   //   });
-  //   // });
-  //   // return dataFilter;
-  //   return dataFilter;
-  // }
+  convertToWhereTypeORM(where: WhereOperators<E>) {
+    const dataFilter = {};
+    // TODO: Implement this method, which converts the where object to a format that is compatible with TypeORM
+    // Iterate over each item in the filter array
+    // where.map((item) => {
+    //   // Destructure the field, operator, and value from the item
+    //   const { field, operator, value }: QueryFilter = item;
+    //   // Split the field string into an array of fields
+    //   const fields = field.split('.');
+    //   // Initialize the currentField to the dataFilter object
+    //   let currentField = dataFilter;
+    //   // Iterate over the fields array, excluding the last field
+    //   // This loop is used to create nested objects in the dataFilter object for each field
+    //   for (let i = 0; i < fields.length - 1; i++) {
+    //     // If the current field does not exist in the currentField object, initialize it as an empty object
+    //     currentField[fields[i]] = currentField[fields[i]] || {};
+    //     // Update the currentField to point to the newly created nested object
+    //     currentField = currentField[fields[i]];
+    //   }
+    //   // For the last field in the fields array, call the convertOperatorToTypeORM method
+    //   // This method converts the operator and value to a format that is compatible with TypeORM
+    //   // The result is assigned to the last field in the currentField object
+    //   currentField[fields[fields.length - 1]] = this.convertOperatorToTypeORM({
+    //     operator,
+    //     value,
+    //   });
+    // });
+    for (const field in where) {
+      const fields = field.split('.');
+      // if 
+    }
+    return dataFilter;
+  }
 
+  /**
+   * Converts the given operator and value to a TypeORM query condition.
+   *
+   * @param operator - The operator to be converted.
+   * @param value - The value to be used in the query condition.
+   * @returns The TypeORM query condition corresponding to the given operator and value.
+   * @throws {BadRequestException} If the operator is not supported or if the "between" operator value is invalid.
+   */
   convertOperatorToTypeORM({
     operator,
     value,
@@ -131,5 +193,41 @@ export class BaseMysqlService<E extends ObjectLiteral> {
       default:
         throw new BadRequestException(`Unsupported operator: ${operator}`);
     }
+  }
+
+  /**
+   * Converts an array of fields into a TypeORM FindOptionsSelect or FindOptionsSelectByString object.
+   *
+   * @param fields - An array of fields to convert.
+   * @returns The converted TypeORM object.
+   */
+  convertFieldsToTypeORM(
+    fields: string[] | undefined,
+  ): FindOptionsSelect<E> | FindOptionsSelectByString<E> {
+    const convertedFields: any = {};
+    if (!fields) {
+      return {};
+    }
+    if (fields.length) {
+      for (const field of fields) {
+        let currentField = convertedFields;
+        const splitField = field.split('.');
+
+        // Iterate over each subfield in the splitField array, except for the last one
+        for (let i = 0; i < splitField.length - 1; i++) {
+          // If the current subfield does not exist in the current field object, create it as an empty object
+          if (!currentField[splitField[i]]) {
+            currentField[splitField[i]] = {};
+          }
+          // Update the current field object to be the current subfield object
+          currentField = currentField[splitField[i]];
+        }
+        // Assign the value true to the last subfield in the current field object
+        currentField[splitField[splitField.length - 1]] = true;
+      }
+    }
+    return convertedFields as
+      | FindOptionsSelect<E>
+      | FindOptionsSelectByString<E>;
   }
 }

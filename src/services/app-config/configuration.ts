@@ -6,7 +6,7 @@ export const getConfig = (): AppConfig => {
     logLevel: process.env.LOG_LEVEL || 'info',
     database: {
       host: process.env.DB_HOST as string,
-      port: parseInt(process.env.DB_PORT as string, 10) || 5432,
+      port: parseInt(process.env.DB_PORT as string, 10) || 3306,
       user: process.env.DB_USER as string,
       password: process.env.DB_PASSWORD as string,
       dbName: process.env.DB_NAME as string,
@@ -14,7 +14,7 @@ export const getConfig = (): AppConfig => {
     cache: {
       host: process.env.REDIS_HOST as string,
       port: parseInt(process.env.REDIS_PORT as string, 10) || 6379,
-      password: process.env.REDIS_PASSWORD as string,
+      password: (process.env.REDIS_PASSWORD as string) || '',
     },
     mail: {
       from: process.env.MAIL_FROM as string,
@@ -30,7 +30,7 @@ export const getConfig = (): AppConfig => {
   };
 };
 
-export interface AppConfig {
+export type AppConfig = {
   port: number;
   appEnv: AppEnv;
   jwtSecret: string;
@@ -38,7 +38,7 @@ export interface AppConfig {
   database: DbConfig;
   cache: CacheConfig;
   mail: MailConfig;
-}
+};
 
 export enum AppEnv {
   DEV = 'dev',
@@ -46,21 +46,21 @@ export enum AppEnv {
   PROD = 'production',
 }
 
-export interface DbConfig {
+export type DbConfig = {
   host: string;
   port: number;
   user: string;
   password: string;
   dbName: string;
-}
+};
 
-export interface CacheConfig {
+export type CacheConfig = {
   host: string;
   port: number;
   password: string;
-}
+};
 
-export interface MailConfig {
+export type MailConfig = {
   from: string;
   transportOptions: {
     host: string;
@@ -70,4 +70,4 @@ export interface MailConfig {
       pass: string;
     };
   };
-}
+};

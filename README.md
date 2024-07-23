@@ -1,6 +1,5 @@
 # Nest.js starter kit
 
-[![test](https://github.com/rodion-arr/nestjs-starter-kit/workflows/Test/badge.svg)](https://github.com/rodion-arr/nestjs-starter-kit/actions?query=workflow%3A%22Test%22) [![codecov](https://codecov.io/gh/rodion-arr/nestjs-starter-kit/branch/main/graph/badge.svg?token=NGR0C23CMW)](https://codecov.io/gh/rodion-arr/nestjs-starter-kit)
 
 This is a starter kit for typical Nest.js REST API project.
 
@@ -14,18 +13,24 @@ This repo provides an already configured REST API project with commonly used Nes
 
 ## Features
 
-- [Dockerized local development](#dockerized-local-development)
-- [Configuration via ENV variables](#configuration-via-env-variables)
-- [Validation via DTO](#validation-via-dto)
-- [DB migrations](#db-migrations)
-- [Redis cache](#redis-cache)
-- [JWT auth with passport.js](#jwt-auth-with-passportjs)
-- [Logger with TraceID generation](#logger-with-trace-id-generation)
-- [Graceful shutdown](#graceful-shutdown)
-- [Automatic APIs documentation with Swagger](#automatic-apis-documentation-with-swagger)
-- [Sending emails](#e-mail-service-with-local-mail-trap)
-- [Unit tests](#unit-tests)
-- [Health check](#health-check)
+- [Nest.js starter kit](#nestjs-starter-kit)
+  - [Motivation](#motivation)
+  - [Features](#features)
+    - [Dockerized local development](#dockerized-local-development)
+    - [Configuration via ENV variables](#configuration-via-env-variables)
+    - [Validation via DTO](#validation-via-dto)
+    - [DB migrations](#db-migrations)
+    - [Redis cache](#redis-cache)
+    - [JWT auth with passport.js](#jwt-auth-with-passportjs)
+    - [Logger with Trace ID generation](#logger-with-trace-id-generation)
+    - [Graceful shutdown](#graceful-shutdown)
+    - [Automatic APIs documentation with Swagger](#automatic-apis-documentation-with-swagger)
+    - [E-mail service with local mail trap](#e-mail-service-with-local-mail-trap)
+    - [Unit tests](#unit-tests)
+  - [Health check](#health-check)
+  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+    - [Getting started](#getting-started)
 
 ### Dockerized local development
 

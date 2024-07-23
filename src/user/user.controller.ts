@@ -27,7 +27,6 @@ export class UserController {
     const newUser = await this.authService.register(user);
 
     return {
-      message: 'User created',
       user: {
         id: newUser.id,
         token: newUser.token,
@@ -40,7 +39,6 @@ export class UserController {
     const token = await this.authService.login(login);
 
     return {
-      message: 'Login successful',
       token,
     };
   }
@@ -53,7 +51,6 @@ export class UserController {
     const users = await this.userService.getAll();
 
     return {
-      message: 'Users retrieved successfully',
       users,
     };
   }

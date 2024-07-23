@@ -13,43 +13,49 @@ export type CompareOperators =
   | 'notin'
   | 'notnull'
   | 'isnull'
-  | 'between';
+  | 'between'
+  | 'or';
 
-export type FindOperators<E, K extends keyof E> =
-  | E[K]
+export type QueryType = string | number | boolean | Date;
+
+export type QueryValue =
+  | QueryType
   | {
-      eq?: E[K];
-      ne?: E[K];
-      gt?: E[K];
-      lt?: E[K];
-      gte?: E[K];
-      lte?: E[K];
-      in?: E[K][];
-      nin?: E[K][];
+      eq?: QueryType;
+      ne?: QueryType;
+      gt?: QueryType;
+      lt?: QueryType;
+      gte?: QueryType;
+      lte?: QueryType;
+      in?: QueryType[];
+      nin?: QueryType[];
       like?: string;
       ilike?: string;
-      contain?: E[K];
+      contain?: QueryType;
       notnull?: boolean;
       isnull?: boolean;
-      between?: [E[K], E[K]];
+      between?: [QueryType, QueryType];
     };
 
-export type WhereOperators<E> = {
-  [K in keyof E]?: FindOperators<E, K>;
+export type QueryOperator = Record<string, QueryValue>;
+
+export type WhereOperators = {
+  or?: Array<QueryValue>;
+} & QueryOperator;
+
+export type JoinOperator = Array<string>;
+
+export type SelectOperator = Array<string>;
+
+export type FindOneOperators = {
+  where?: WhereOperators;
+  join?: JoinOperator;
+  select?: SelectOperator;
+  withDeleted?: boolean;
 };
 
-export type JoinOperator<E> = Array<keyof E>;
-
-export type SelectOperator<E> = Array<keyof E>;
-
-export type FindOneOperators<E> = {
-  where?: WhereOperators<E>;
-  join?: JoinOperator<E>;
-  select?: SelectOperator<E>;
-};
-
-export type FindManyOperators<E> = FindOneOperators<E> & {
-  sort?: [keyof E, 'ASC' | 'DESC'];
+export type FindManyOperators = FindOneOperators & {
+  sort?: Array<string>;
   page?: number;
   pageSize?: number;
 };

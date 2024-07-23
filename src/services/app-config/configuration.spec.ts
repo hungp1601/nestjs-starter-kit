@@ -21,7 +21,7 @@ describe('config helper', () => {
     expect(getConfig()).toStrictEqual({
       cache: {
         host: 'localhost',
-        password: 'secret',
+        password: '',
         port: 6379,
       },
       database: {

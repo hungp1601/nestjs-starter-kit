@@ -25,6 +25,6 @@ export class UserEntity {
   })
   passwordHash: string;
 
-  @Column()
-  token: string;
+  @Column({ nullable: true })
+  token?: string;
 }

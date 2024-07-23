@@ -15,9 +15,12 @@ import { getConfig } from '../services/app-config/configuration';
           host,
           port,
           username: user,
+          synchronize: true,
           password,
           database: dbName,
           autoLoadEntities: true,
+          entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+          subscribers: [__dirname + '/../**/*.subscriber{.ts,.js}'],
         };
       },
     }),
