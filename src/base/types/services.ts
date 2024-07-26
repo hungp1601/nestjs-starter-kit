@@ -22,18 +22,44 @@ export type QueryValue =
   | QueryType
   | {
       eq?: QueryType;
+    }
+  | {
       ne?: QueryType;
+    }
+  | {
       gt?: QueryType;
+    }
+  | {
       lt?: QueryType;
+    }
+  | {
       gte?: QueryType;
+    }
+  | {
       lte?: QueryType;
+    }
+  | {
       in?: QueryType[];
+    }
+  | {
       nin?: QueryType[];
+    }
+  | {
       like?: string;
+    }
+  | {
       ilike?: string;
+    }
+  | {
       contain?: QueryType;
+    }
+  | {
       notnull?: boolean;
+    }
+  | {
       isnull?: boolean;
+    }
+  | {
       between?: [QueryType, QueryType];
     };
 
@@ -52,10 +78,18 @@ export type FindOneOperators = {
   join?: JoinOperator;
   select?: SelectOperator;
   withDeleted?: boolean;
+  cache?: boolean | number;
 };
 
 export type FindManyOperators = FindOneOperators & {
   sort?: Array<string>;
   page?: number;
   pageSize?: number;
+};
+
+export type FindManyResponse<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 };

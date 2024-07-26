@@ -17,7 +17,13 @@ import {
   ObjectLiteral,
   Raw,
 } from 'typeorm';
-import { CompareOperators, FindOneOperators, WhereOperators } from '../types';
+import {
+  CompareOperators,
+  FindManyOperators,
+  FindManyResponse,
+  FindOneOperators,
+  WhereOperators,
+} from '../types';
 import { RequestLoggerInterceptor } from 'src/logger/interceptors/request-logger.interceptor';
 import { BaseMysqlRepository } from '../repositories/base-mysql.repository';
 
@@ -34,6 +40,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
   findOneById(id: string) {
     return this.repository.findOne({
       where: { id: id as any },
+      cache: true,
     });
   }
 
@@ -42,22 +49,59 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     join = [],
     select = [],
     withDeleted = false,
-  }: FindOneOperators<E>) {
+    cache = true,
+  }: FindOneOperators) {
     try {
       const whereType = this.convertToWhereTypeORM(where);
       const selectType = this.convertFieldsToTypeORM(select);
-      const joinType: FindOptionsRelations<E> | FindOptionsRelationByString =
-        join?.reduce((acc: any, curr) => {
-          acc[curr] = true;
-          return acc;
-        }, {});
+      const joinType = this.convertToJoinTypeORM(join);
 
       return await this.repository.findOne({
         where: whereType,
         relations: joinType,
         select: selectType,
         withDeleted,
+        cache,
       });
+    } catch {
+      this.logger.error('Error finding entity');
+      throw new BadRequestException('Failed to find entity');
+    }
+  }
+
+  async findMany({
+    where = {},
+    join = [],
+    select = [],
+    sort = [],
+    page = 1,
+    pageSize = 10,
+    withDeleted = false,
+    cache = true,
+  }: FindManyOperators): Promise<FindManyResponse<E>> {
+    try {
+      const whereType = this.convertToWhereTypeORM(where);
+      const selectType = this.convertFieldsToTypeORM(select);
+      const joinType = this.convertToJoinTypeORM(join);
+      const sortType = this.convertToSortTypeORM(sort);
+
+      const [entities, total] = await this.repository.findAndCount({
+        where: whereType,
+        relations: joinType,
+        select: selectType,
+        order: sortType,
+        take: pageSize,
+        skip: (page - 1) * pageSize,
+        withDeleted,
+        cache,
+      });
+
+      return {
+        data: entities,
+        total,
+        page,
+        pageSize,
+      };
     } catch {
       this.logger.error('Error finding entity');
       throw new BadRequestException('Failed to find entity');
@@ -111,36 +155,49 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     }
   }
 
-  convertToWhereTypeORM(where: WhereOperators<E>) {
-    const dataFilter = {};
+  convertToWhereTypeORM(where: WhereOperators) {
+    const dataFilter = [];
     // TODO: Implement this method, which converts the where object to a format that is compatible with TypeORM
     // Iterate over each item in the filter array
     // where.map((item) => {
     //   // Destructure the field, operator, and value from the item
-    //   const { field, operator, value }: QueryFilter = item;
-    //   // Split the field string into an array of fields
-    //   const fields = field.split('.');
-    //   // Initialize the currentField to the dataFilter object
-    //   let currentField = dataFilter;
-    //   // Iterate over the fields array, excluding the last field
-    //   // This loop is used to create nested objects in the dataFilter object for each field
-    //   for (let i = 0; i < fields.length - 1; i++) {
-    //     // If the current field does not exist in the currentField object, initialize it as an empty object
-    //     currentField[fields[i]] = currentField[fields[i]] || {};
-    //     // Update the currentField to point to the newly created nested object
-    //     currentField = currentField[fields[i]];
-    //   }
-    //   // For the last field in the fields array, call the convertOperatorToTypeORM method
-    //   // This method converts the operator and value to a format that is compatible with TypeORM
-    //   // The result is assigned to the last field in the currentField object
-    //   currentField[fields[fields.length - 1]] = this.convertOperatorToTypeORM({
-    //     operator,
-    //     value,
-    //   });
+    // const { field, operator, value }: QueryFilter = item;
+    // // Split the field string into an array of fields
+    // const fields = field.split('.');
+    // // Initialize the currentField to the dataFilter object
+    // let currentField = dataFilter;
+    // // Iterate over the fields array, excluding the last field
+    // // This loop is used to create nested objects in the dataFilter object for each field
+    // for (let i = 0; i < fields.length - 1; i++) {
+    //   // If the current field does not exist in the currentField object, initialize it as an empty object
+    //   currentField[fields[i]] = currentField[fields[i]] || {};
+    //   // Update the currentField to point to the newly created nested object
+    //   currentField = currentField[fields[i]];
+    // }
+    // // For the last field in the fields array, call the convertOperatorToTypeORM method
+    // // This method converts the operator and value to a format that is compatible with TypeORM
+    // // The result is assigned to the last field in the currentField object
+    // currentField[fields[fields.length - 1]] = this.convertOperatorToTypeORM({
+    //   operator,
+    //   value,
+    // });
     // });
     for (const field in where) {
-      const fields = field.split('.');
-      // if 
+      if (field === 'or') {
+      } else {
+        const fields = field.split('.');
+        let value = where[field];
+        let operator: CompareOperators = 'eq';
+        if (value && typeof value === 'object') {
+          const keys = Object.keys(value);
+          if (keys.length > 0) {
+            operator = keys[0] as CompareOperators;
+          }
+        } else if (value && typeof value === 'string') {
+          operator = 'eq';
+        }
+        const type = this.convertOperatorToTypeORM({ operator, value });
+      }
     }
     return dataFilter;
   }
@@ -229,5 +286,37 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     return convertedFields as
       | FindOptionsSelect<E>
       | FindOptionsSelectByString<E>;
+  }
+
+  /**
+   * Converts an array of sort strings to a TypeORM-compatible sort object.
+   * @param sort - The array of sort strings.
+   * @returns The converted sort object.
+   */
+  convertToSortTypeORM(sort: string[]) {
+    const sortType: any = {};
+    for (const sortItem of sort) {
+      const order = sortItem.startsWith('-') ? 'DESC' : 'ASC';
+      const field = sortItem.charAt(0) === '-' ? sortItem.slice(1) : sortItem;
+      const fields = field.split('.');
+      let currentField = sortType;
+      for (let i = 0; i < fields.length - 1; i++) {
+        if (!currentField[fields[i]]) {
+          currentField[fields[i]] = {};
+        }
+        currentField = currentField[fields[i]];
+      }
+      currentField[fields[fields.length - 1]] = order;
+    }
+    return sortType;
+  }
+
+  convertToJoinTypeORM(
+    join: string[],
+  ): FindOptionsRelations<E> | FindOptionsRelationByString {
+    return join?.reduce((acc: any, curr) => {
+      acc[curr] = true;
+      return acc;
+    }, {});
   }
 }
