@@ -21,45 +21,19 @@ export type QueryType = string | number | boolean | Date;
 export type QueryValue =
   | QueryType
   | {
-      eq?: QueryType;
-    }
-  | {
       ne?: QueryType;
-    }
-  | {
+      eq?: QueryType;
       gt?: QueryType;
-    }
-  | {
       lt?: QueryType;
-    }
-  | {
       gte?: QueryType;
-    }
-  | {
       lte?: QueryType;
-    }
-  | {
       in?: QueryType[];
-    }
-  | {
       nin?: QueryType[];
-    }
-  | {
       like?: string;
-    }
-  | {
       ilike?: string;
-    }
-  | {
       contain?: QueryType;
-    }
-  | {
       notnull?: boolean;
-    }
-  | {
       isnull?: boolean;
-    }
-  | {
       between?: [QueryType, QueryType];
     };
 
@@ -67,7 +41,8 @@ export type QueryOperator = Record<string, QueryValue>;
 
 export type WhereOperators = {
   or?: Array<QueryValue>;
-} & QueryOperator;
+  and?: Array<QueryValue>;
+};
 
 export type JoinOperator = Array<string>;
 

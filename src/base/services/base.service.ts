@@ -3,6 +3,7 @@ import {
   Between,
   DeepPartial,
   Equal,
+  FindOperator,
   FindOptionsRelationByString,
   FindOptionsRelations,
   FindOptionsSelect,
@@ -22,7 +23,10 @@ import {
   FindManyOperators,
   FindManyResponse,
   FindOneOperators,
+  QueryOperator,
+  QueryValue,
   WhereOperators,
+  QueryType,
 } from '../types';
 import { RequestLoggerInterceptor } from 'src/logger/interceptors/request-logger.interceptor';
 import { BaseMysqlRepository } from '../repositories/base-mysql.repository';
@@ -182,21 +186,25 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     //   value,
     // });
     // });
-    for (const field in where) {
-      if (field === 'or') {
-      } else {
-        const fields = field.split('.');
-        let value = where[field];
-        let operator: CompareOperators = 'eq';
-        if (value && typeof value === 'object') {
-          const keys = Object.keys(value);
-          if (keys.length > 0) {
-            operator = keys[0] as CompareOperators;
+    for (const query in where) {
+      if (query === 'or') {
+      } else if (query === 'and') {
+        for (const item of where[query] as QueryOperator[]) {
+          const andQuery = [];
+          for (const [key, value] of Object.entries(item)) {
+            let operator: CompareOperators = 'eq';
+            const itemQuery = [];
+            if (typeof value === 'object') {
+              operator = Object.keys(value)[0] as CompareOperators;
+            } else {
+              itemQuery.push(
+                this.convertOperatorToTypeORM({ operator, value }),
+              );
+            }
+            andQuery.push(itemQuery);
           }
-        } else if (value && typeof value === 'string') {
-          operator = 'eq';
         }
-        const type = this.convertOperatorToTypeORM({ operator, value });
+        // const type = this.convertOperatorToTypeORM({ operator, value });
       }
     }
     return dataFilter;
