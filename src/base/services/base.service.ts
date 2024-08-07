@@ -76,6 +76,18 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     }
   }
 
+  async count({ where = {} }: { where: WhereOperators }) {
+    try {
+      const whereType = this.convertToWhereTypeORM(where);
+      return await this.repository.count({
+        where: whereType,
+      });
+    } catch (e) {
+      this.logger.error('Error counting entity' + e);
+      throw new BadRequestException('Failed to count entity');
+    }
+  }
+
   async findMany({
     where = {},
     join = [],
@@ -476,6 +488,11 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     return sortType;
   }
 
+  /**
+   * Converts an array of join strings into a FindOptionsRelations object or a FindOptionsRelationByString object.
+   * @param join - An array of join strings.
+   * @returns A FindOptionsRelations object or a FindOptionsRelationByString object.
+   */
   convertToJoinTypeORM(
     join: string[],
   ): FindOptionsRelations<E> | FindOptionsRelationByString {
