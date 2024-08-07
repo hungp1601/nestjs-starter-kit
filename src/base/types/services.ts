@@ -62,6 +62,10 @@ export type FindManyOperators = FindOneOperators & {
   pageSize?: number;
 };
 
+export type FindAllOperators = FindOneOperators & {
+  sort?: Array<string>;
+};
+
 export type FindManyResponse<T> = {
   data: T[];
   total: number;

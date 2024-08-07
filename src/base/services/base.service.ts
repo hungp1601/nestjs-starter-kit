@@ -24,6 +24,7 @@ import {
 } from 'typeorm';
 import {
   CompareOperators,
+  FindAllOperators,
   FindManyOperators,
   FindManyResponse,
   FindOneOperators,
@@ -114,16 +115,34 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     }
   }
 
-  // async findAll({
-  //   where = {},
-  //   join = [],
-  //   select = [],
-  //   sort = [],
-  //   page = 1,
-  //   pageSize = 10,
-  //   withDeleted = false,
-  //   cache = true,
-  // })
+  async findAll({
+    where = {},
+    join = [],
+    select = [],
+    sort = [],
+    withDeleted = false,
+    cache = true,
+  }: FindAllOperators): Promise<E[]> {
+    try {
+      const page = 1;
+      const pageSize = 1000;
+
+      const { data } = await this.findMany({
+        where,
+        join,
+        select,
+        sort,
+        page,
+        pageSize,
+        withDeleted,
+        cache,
+      });
+      return data;
+    } catch (e) {
+      this.logger.error('Error finding entity' + e);
+      throw new BadRequestException('Failed to find entity');
+    }
+  }
 
   async deleteOneById({ id }: { id: string }, hardDelete: boolean = false) {
     try {
@@ -150,13 +169,13 @@ export class BaseMysqlService<E extends ObjectLiteral> {
 
   async deleteMany({ where = {} }, hardDelete = false) {
     try {
-      const entities = await this.findMany({ where });
-      if (!entities.data.length) {
+      const entities = await this.findAll({ where, select: ['id'] });
+      if (!entities.length) {
         return undefined;
       }
       let result: UpdateResult | DeleteResult;
 
-      const entitiesIds = entities.data.map((entity) => entity.id);
+      const entitiesIds = entities.map((entity) => entity.id);
       if (hardDelete) {
         result = await this.repository.delete(entitiesIds);
       } else {
@@ -174,7 +193,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
 
   async deleteOne({ where = {} }, hardDelete = false) {
     try {
-      const entity = await this.findOne({ where });
+      const entity = await this.findOne({ where, select: ['id'] });
       if (!entity) {
         return undefined;
       }
@@ -192,6 +211,51 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     } catch (e) {
       this.logger.error('Error deleting entity' + e);
       throw new BadRequestException('Failed to delete entity');
+    }
+  }
+
+  async updateOne({
+    where = {},
+    entity,
+  }: {
+    where: WhereOperators;
+    entity: DeepPartial<E>;
+  }) {
+    try {
+      const entityToUpdate = await this.findOne({ where });
+      if (!entityToUpdate) {
+        return undefined;
+      }
+      const update = await this.repository.save({
+        ...entityToUpdate,
+        ...entity,
+      });
+      return update;
+    } catch (e) {
+      this.logger.error('Error updating entity' + e);
+      throw new BadRequestException('Failed to update entity');
+    }
+  }
+
+  async updateMany({
+    where = {},
+    entity,
+  }: {
+    where: WhereOperators;
+    entity: E;
+  }) {
+    try {
+      const entitiesToUpdate = await this.findAll({ where });
+      if (!entitiesToUpdate.length) {
+        return undefined;
+      }
+      const update = await this.repository.save(
+        entitiesToUpdate.map((e) => ({ ...e, ...entity })),
+      );
+      return await this.repository.save(update);
+    } catch (e) {
+      this.logger.error('Error updating entities' + e);
+      throw new BadRequestException('Failed to update entities');
     }
   }
 
@@ -213,6 +277,20 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     } catch (e) {
       this.logger.error('Error creating entity' + e);
       throw new BadRequestException('Failed to create entity');
+    }
+  }
+
+  async createMany(entities: DeepPartial<E>[]): Promise<E[]> {
+    try {
+      const e = this.repository.create(entities);
+      const result = await this.repository.save(e);
+      if (!result) {
+        throw new BadRequestException('Failed to create entities');
+      }
+      return result;
+    } catch (e) {
+      this.logger.error('Error creating entities' + e);
+      throw new BadRequestException('Failed to create entities');
     }
   }
 
