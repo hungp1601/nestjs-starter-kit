@@ -3,7 +3,6 @@ import {
   Between,
   DeepPartial,
   Equal,
-  FindOperator,
   FindOptionsRelationByString,
   FindOptionsRelations,
   FindOptionsSelect,
@@ -17,6 +16,11 @@ import {
   Not,
   ObjectLiteral,
   Raw,
+  And,
+  FindOperator,
+  FindOptionsWhere,
+  DeleteResult,
+  UpdateResult,
 } from 'typeorm';
 import {
   CompareOperators,
@@ -24,9 +28,7 @@ import {
   FindManyResponse,
   FindOneOperators,
   QueryOperator,
-  QueryValue,
   WhereOperators,
-  QueryType,
 } from '../types';
 import { RequestLoggerInterceptor } from 'src/logger/interceptors/request-logger.interceptor';
 import { BaseMysqlRepository } from '../repositories/base-mysql.repository';
@@ -67,8 +69,8 @@ export class BaseMysqlService<E extends ObjectLiteral> {
         withDeleted,
         cache,
       });
-    } catch {
-      this.logger.error('Error finding entity');
+    } catch (e) {
+      this.logger.error('Error finding entity' + e);
       throw new BadRequestException('Failed to find entity');
     }
   }
@@ -112,6 +114,87 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     }
   }
 
+  // async findAll({
+  //   where = {},
+  //   join = [],
+  //   select = [],
+  //   sort = [],
+  //   page = 1,
+  //   pageSize = 10,
+  //   withDeleted = false,
+  //   cache = true,
+  // })
+
+  async deleteOneById({ id }: { id: string }, hardDelete: boolean = false) {
+    try {
+      const entity = await this.findOneById(id);
+      if (!entity) {
+        return undefined;
+      }
+      let result: UpdateResult | DeleteResult;
+
+      if (hardDelete) {
+        result = await this.repository.delete(entity);
+      } else {
+        result = await this.repository.softDelete(entity);
+      }
+      if (!result.affected) {
+        throw new BadRequestException('Failed to delete entity');
+      }
+      return { success: true };
+    } catch (e) {
+      this.logger.error('Error deleting entity' + e);
+      throw new BadRequestException('Failed to delete entity');
+    }
+  }
+
+  async deleteMany({ where = {} }, hardDelete = false) {
+    try {
+      const entities = await this.findMany({ where });
+      if (!entities.data.length) {
+        return undefined;
+      }
+      let result: UpdateResult | DeleteResult;
+
+      const entitiesIds = entities.data.map((entity) => entity.id);
+      if (hardDelete) {
+        result = await this.repository.delete(entitiesIds);
+      } else {
+        result = await this.repository.softDelete(entitiesIds);
+      }
+      if (!result.affected) {
+        throw new BadRequestException('Failed to delete entities');
+      }
+      return { success: true };
+    } catch (e) {
+      this.logger.error('Error deleting entities' + e);
+      throw new BadRequestException('Failed to delete entities');
+    }
+  }
+
+  async deleteOne({ where = {} }, hardDelete = false) {
+    try {
+      const entity = await this.findOne({ where });
+      if (!entity) {
+        return undefined;
+      }
+      let result: UpdateResult | DeleteResult;
+
+      if (hardDelete) {
+        result = await this.repository.delete(entity);
+      } else {
+        result = await this.repository.softDelete(entity);
+      }
+      if (!result.affected) {
+        throw new BadRequestException('Failed to delete entity');
+      }
+      return { success: true };
+    } catch (e) {
+      this.logger.error('Error deleting entity' + e);
+      throw new BadRequestException('Failed to delete entity');
+    }
+  }
+
   /**
    * Creates a new entity in the database.
    *
@@ -127,8 +210,8 @@ export class BaseMysqlService<E extends ObjectLiteral> {
         throw new BadRequestException('Failed to create entity');
       }
       return result;
-    } catch {
-      this.logger.error('Error creating entity');
+    } catch (e) {
+      this.logger.error('Error creating entity' + e);
       throw new BadRequestException('Failed to create entity');
     }
   }
@@ -153,8 +236,8 @@ export class BaseMysqlService<E extends ObjectLiteral> {
       }
 
       return this.repository.save(entity);
-    } catch {
-      this.logger.error('Error updating entity');
+    } catch (e) {
+      this.logger.error('Error updating entity' + e);
       throw new BadRequestException('Failed to update entity');
     }
   }
@@ -162,52 +245,48 @@ export class BaseMysqlService<E extends ObjectLiteral> {
   convertToWhereTypeORM(where: WhereOperators) {
     const dataFilter = [];
     // TODO: Implement this method, which converts the where object to a format that is compatible with TypeORM
-    // Iterate over each item in the filter array
-    // where.map((item) => {
-    //   // Destructure the field, operator, and value from the item
-    // const { field, operator, value }: QueryFilter = item;
-    // // Split the field string into an array of fields
-    // const fields = field.split('.');
-    // // Initialize the currentField to the dataFilter object
-    // let currentField = dataFilter;
-    // // Iterate over the fields array, excluding the last field
-    // // This loop is used to create nested objects in the dataFilter object for each field
-    // for (let i = 0; i < fields.length - 1; i++) {
-    //   // If the current field does not exist in the currentField object, initialize it as an empty object
-    //   currentField[fields[i]] = currentField[fields[i]] || {};
-    //   // Update the currentField to point to the newly created nested object
-    //   currentField = currentField[fields[i]];
-    // }
-    // // For the last field in the fields array, call the convertOperatorToTypeORM method
-    // // This method converts the operator and value to a format that is compatible with TypeORM
-    // // The result is assigned to the last field in the currentField object
-    // currentField[fields[fields.length - 1]] = this.convertOperatorToTypeORM({
-    //   operator,
-    //   value,
-    // });
-    // });
     for (const query in where) {
-      if (query === 'or') {
-      } else if (query === 'and') {
+      if (query === 'and') {
         for (const item of where[query] as QueryOperator[]) {
           const andQuery = [];
           for (const [key, value] of Object.entries(item)) {
-            let operator: CompareOperators = 'eq';
-            const itemQuery = [];
+            const itemQuery: FindOperator<any>[] = [];
             if (typeof value === 'object') {
-              operator = Object.keys(value)[0] as CompareOperators;
+              for (const [keyO, valueO] of Object.entries(value)) {
+                itemQuery.push(
+                  this.convertOperatorToTypeORM({
+                    operator: keyO as CompareOperators,
+                    value: valueO,
+                  }),
+                );
+              }
             } else {
               itemQuery.push(
-                this.convertOperatorToTypeORM({ operator, value }),
+                this.convertOperatorToTypeORM({ operator: 'eq', value }),
               );
             }
-            andQuery.push(itemQuery);
+            andQuery.push({
+              [key]: And(...itemQuery),
+            });
           }
+          const andQueryFinal: { [key: string]: FindOperator<any> } = {};
+          for (const item of andQuery) {
+            const [key, value] = Object.entries(item)[0];
+            andQueryFinal[key] = value;
+          }
+          dataFilter.push(andQueryFinal);
         }
-        // const type = this.convertOperatorToTypeORM({ operator, value });
       }
     }
-    return dataFilter;
+
+    //TODO: Implement the "or" operator
+    // for (const query in where) {
+    //   if (query === 'or') {
+    //     for (const item of where[query] as QueryOperator[]) {
+    //     }
+    //   }
+    // }
+    return dataFilter as FindOptionsWhere<E>[];
   }
 
   /**
