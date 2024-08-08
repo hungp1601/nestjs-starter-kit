@@ -5,20 +5,27 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { PasswordService } from '../password/password.service';
 import { JwtService } from '../jwt/jwt.service';
+import { BaseMysqlService } from 'src/base/services/base.service';
 
 @Injectable()
-export class UserService {
+export class UserService extends BaseMysqlService<UserEntity> {
   constructor(
     @InjectRepository(UserEntity)
     private usersRepository: Repository<UserEntity>,
     private readonly passwordService: PasswordService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) {
+    super(usersRepository);
+  }
 
   async isUserExists(email: string): Promise<UserEntity | null> {
-    return this.usersRepository.findOne({
+    return await this.findOne({
       where: {
-        email: email.toLowerCase(),
+        and: [
+          {
+            email: email.toLowerCase(),
+          },
+        ],
       },
     });
   }
@@ -55,12 +62,6 @@ export class UserService {
       email: user.email.toLowerCase(),
       firstName: user.firstName,
       lastName: user.lastName,
-    });
-  }
-
-  public getAll(): Promise<UserEntity[]> {
-    return this.usersRepository.find({
-      select: ['id', 'email', 'lastName', 'firstName'],
     });
   }
 }

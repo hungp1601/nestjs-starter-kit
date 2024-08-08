@@ -40,8 +40,8 @@ export type QueryValue =
 export type QueryOperator = Record<string, QueryValue>;
 
 export type WhereOperators = {
-  or?: Array<QueryValue>;
-  and?: Array<QueryValue>;
+  or?: Array<QueryOperator>;
+  and?: Array<QueryOperator>;
 };
 
 export type JoinOperator = Array<string>;

@@ -114,7 +114,6 @@ export class BaseMysqlService<E extends ObjectLiteral> {
         withDeleted,
         cache,
       });
-
       return {
         data: entities,
         total,
@@ -333,8 +332,8 @@ export class BaseMysqlService<E extends ObjectLiteral> {
   }
 
   convertToWhereTypeORM(where: WhereOperators) {
-    const dataFilter = [];
-    // TODO: Implement this method, which converts the where object to a format that is compatible with TypeORM
+    const dataFilter: FindOptionsWhere<E>[] = [];
+    const andData: any = {};
     for (const query in where) {
       if (query === 'and') {
         for (const item of where[query] as QueryOperator[]) {
@@ -359,15 +358,15 @@ export class BaseMysqlService<E extends ObjectLiteral> {
               [key]: And(...itemQuery),
             });
           }
-          const andQueryFinal: { [key: string]: FindOperator<any> } = {};
           for (const item of andQuery) {
             const [key, value] = Object.entries(item)[0];
-            andQueryFinal[key] = value;
+            andData[key] = value;
           }
-          dataFilter.push(andQueryFinal);
         }
       }
     }
+
+    dataFilter.push(andData);
 
     //TODO: Implement the "or" operator
     // for (const query in where) {
@@ -376,7 +375,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     //     }
     //   }
     // }
-    return dataFilter as FindOptionsWhere<E>[];
+    return dataFilter;
   }
 
   /**

@@ -27,10 +27,8 @@ export class UserController {
     const newUser = await this.authService.register(user);
 
     return {
-      user: {
-        id: newUser.id,
-        token: newUser.token,
-      },
+      id: newUser.id,
+      token: newUser.token,
     };
   }
 
@@ -48,7 +46,8 @@ export class UserController {
   @UseInterceptors(CacheInterceptor)
   @Get()
   async getUsers() {
-    const users = await this.userService.getAll();
+    console.log('Fetching users');
+    const users = await this.userService.findAll({});
 
     return {
       users,
