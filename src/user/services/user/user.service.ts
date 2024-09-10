@@ -30,38 +30,33 @@ export class UserService extends BaseMysqlService<UserEntity> {
     });
   }
 
-  async createUser(userDto: CreateUserDto): Promise<UserEntity> {
-    const userPayload = {
+  async createUser(userDto: CreateUserDto) {
+    const userPayload: CreateUserDto = {
       email: userDto.email.toLowerCase(),
-      firstName: userDto.firstName,
-      lastName: userDto.lastName,
-      passwordHash: await this.passwordService.generate(userDto.password),
+      name: userDto.name,
+      password: await this.passwordService.generate(userDto.password),
     };
 
-    let newUser = this.usersRepository.create(userPayload);
-    newUser = await this.updateUser(newUser);
+    const newUser = await this.createOne(userPayload);
 
-    newUser.token = this.getUserToken(newUser);
-    return await this.updateUser(newUser);
-  }
-
-  async updateUser(newUser: UserEntity): Promise<UserEntity> {
-    return await this.usersRepository.save(newUser);
+    return {
+      ...newUser,
+      token: this.getUserToken(newUser),
+    };
   }
 
   async checkUserPassword(
     user: UserEntity,
     requestPassword: string,
   ): Promise<boolean> {
-    return this.passwordService.compare(requestPassword, user.passwordHash);
+    return this.passwordService.compare(requestPassword, user.password);
   }
 
   public getUserToken(user: UserEntity): string {
     return this.jwtService.sign({
       id: user.id,
       email: user.email.toLowerCase(),
-      firstName: user.firstName,
-      lastName: user.lastName,
+      name: user.name,
     });
   }
 }

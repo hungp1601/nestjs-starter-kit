@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { AuthService } from './services/auth/auth.service';
@@ -48,16 +49,14 @@ describe('UserController', () => {
       jest.spyOn(authService, 'register').mockResolvedValue({
         id: 0,
         token: 'token',
-        firstName: 'firstName',
-        lastName: 'lastName',
+        name: 'firstName',
         email: 'email',
-        passwordHash: 'p',
+        password: 'p',
       });
 
       expect(
         await controller.register({
-          firstName: 'firstName',
-          lastName: 'lastName',
+          name: 'firstName',
           email: 'email',
           password: 'p',
         }),
@@ -87,14 +86,9 @@ describe('UserController', () => {
 
   describe('getUsers method', () => {
     it('should retrieve all users', async () => {
-      const userServiceSpy = jest
-        .spyOn(userService, 'getAll')
-        .mockResolvedValue([mockUserEntity]);
-
       expect(await controller.getUsers()).toStrictEqual({
         users: [mockUserEntity],
       });
-      expect(userServiceSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -2,13 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { UserService } from '../user/user.service';
 import { LoginDto } from '../../dto/login.dto';
-import { UserEntity } from '../../entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly userService: UserService) {}
 
-  async register(userDto: CreateUserDto): Promise<UserEntity> {
+  async register(userDto: CreateUserDto) {
     // check if user exists and send custom error message
     if (await this.userService.isUserExists(userDto.email)) {
       throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
@@ -27,8 +26,6 @@ export class AuthService {
 
     if (await this.userService.checkUserPassword(user, password)) {
       const token = this.userService.getUserToken(user);
-      user.token = token;
-      await this.userService.updateUser(user);
 
       return token;
     }

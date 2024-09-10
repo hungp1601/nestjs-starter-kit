@@ -6,7 +6,6 @@ networks:
 
 volumes:
   mysql-vol: {}
-  redis-vol: {}
 
 services:
   mysql:

@@ -334,6 +334,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
   convertToWhereTypeORM(where: WhereOperators) {
     const dataFilter: FindOptionsWhere<E>[] = [];
     const andData: any = {};
+    const orData: any[] = [];
     for (const query in where) {
       if (query === 'and') {
         for (const item of where[query] as QueryOperator[]) {
@@ -368,13 +369,37 @@ export class BaseMysqlService<E extends ObjectLiteral> {
 
     dataFilter.push(andData);
 
-    //TODO: Implement the "or" operator
-    // for (const query in where) {
-    //   if (query === 'or') {
-    //     for (const item of where[query] as QueryOperator[]) {
-    //     }
-    //   }
-    // }
+    for (const query in where) {
+      if (query === 'or') {
+        for (const item of where[query] as QueryOperator[]) {
+          const orQuery = [];
+          for (const [key, value] of Object.entries(item)) {
+            const itemQuery: FindOperator<any>[] = [];
+            if (typeof value === 'object') {
+              for (const [keyO, valueO] of Object.entries(value)) {
+                itemQuery.push(
+                  this.convertOperatorToTypeORM({
+                    operator: keyO as CompareOperators,
+                    value: valueO,
+                  }),
+                );
+              }
+            } else {
+              itemQuery.push(
+                this.convertOperatorToTypeORM({ operator: 'eq', value }),
+              );
+            }
+            orQuery.push({
+              [key]: And(...itemQuery),
+            });
+          }
+          for (const item of orQuery) {
+            const [key, value] = Object.entries(item)[0];
+            andData[key] = value;
+          }
+        }
+      }
+    }
     return dataFilter;
   }
 

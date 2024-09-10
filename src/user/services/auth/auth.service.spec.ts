@@ -48,8 +48,7 @@ describe('AuthService', () => {
         await authService.register({
           email: 'email',
           password: 'password',
-          lastName: 'lName',
-          firstName: 'fName',
+          name: 'fName',
         });
       } catch (e) {
         expect(e.message).toBe('User already exists');
@@ -64,13 +63,12 @@ describe('AuthService', () => {
         .mockResolvedValue(null);
       const createSpy = jest
         .spyOn(userService, 'createUser')
-        .mockResolvedValue(new UserEntity());
+        .mockResolvedValue({ token: 'mock-token', ...new UserEntity() });
 
       const newUser = await authService.register({
         email: 'email',
         password: 'password',
-        lastName: 'lName',
-        firstName: 'fName',
+        name: 'fName',
       });
 
       expect(newUser).toBeInstanceOf(UserEntity);
@@ -78,8 +76,7 @@ describe('AuthService', () => {
       expect(createSpy).toHaveBeenCalledWith({
         email: 'email',
         password: 'password',
-        lastName: 'lName',
-        firstName: 'fName',
+        name: 'lName',
       });
     });
   });

@@ -8,26 +8,11 @@ export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    name: 'first_name',
-  })
-  firstName: string;
-
-  @Column({
-    name: 'last_name',
-  })
-  lastName: string;
+  name: string;
 
   @Column()
   email: string;
 
   @Exclude()
-  @Column({
-    name: 'password',
-  })
-  passwordHash: string;
-
-  @Exclude()
-  @Column({ nullable: true })
-  token?: string;
+  password: string;
 }

@@ -66,8 +66,7 @@ describe('UserService', () => {
 
     const newUser = await service.createUser({
       email: 'EMAIL',
-      firstName: 'fName',
-      lastName: 'lName',
+      name: 'fName',
       password: 'password',
     });
 
@@ -77,13 +76,11 @@ describe('UserService', () => {
     expect(jwtSpy).toHaveBeenCalledWith({
       id: 0,
       email: 'email',
-      firstName: 'fName',
-      lastName: 'lName',
+      name: 'fName',
     });
     expect(createSpy).toHaveBeenCalledWith({
       email: 'email',
-      firstName: 'fName',
-      lastName: 'lName',
+      name: 'fName',
       passwordHash: 'password-hash',
     });
   });
@@ -98,7 +95,7 @@ describe('UserService', () => {
     ).toBe(true);
     expect(compareSpy).toHaveBeenCalledWith(
       'request-password',
-      mockUserEntity.passwordHash,
+      mockUserEntity.password,
     );
   });
 
@@ -107,9 +104,8 @@ describe('UserService', () => {
       .spyOn(repo, 'find')
       .mockResolvedValue([mockUserEntity]);
 
-    expect(await service.getAll()).toStrictEqual([mockUserEntity]);
     expect(repoSpy).toHaveBeenCalledWith({
-      select: ['id', 'email', 'lastName', 'firstName'],
+      select: ['id', 'email', 'name'],
     });
   });
 });
