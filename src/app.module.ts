@@ -15,6 +15,7 @@ import { HealthModule } from './health/health.module';
     ConfigModule.forRoot({
       cache: true,
       load: [getConfig],
+      isGlobal: true,
     }),
     DbModule,
     AppCacheModule,
