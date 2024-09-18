@@ -24,7 +24,12 @@ export class AuthService {
       return this.failLogin();
     }
 
-    if (await this.userService.checkUserPassword(user, password)) {
+    const isPasswordCorrect = await this.userService.checkUserPassword(
+      user,
+      password,
+    );
+
+    if (isPasswordCorrect) {
       const token = this.userService.getUserToken(user);
 
       return token;

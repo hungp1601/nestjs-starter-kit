@@ -1,5 +1,4 @@
 import { Exclude } from 'class-transformer';
-import { IsUUID } from 'class-validator';
 import {
   CreateDateColumn,
   DeleteDateColumn,
@@ -8,9 +7,8 @@ import {
 } from 'typeorm';
 
 export abstract class BaseMysqlEntity {
-  @PrimaryGeneratedColumn('uuid')
-  @IsUUID()
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Exclude()
   @CreateDateColumn()

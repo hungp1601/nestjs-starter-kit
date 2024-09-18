@@ -6,6 +6,7 @@ import { CreateUserDto } from '../../dto/create-user.dto';
 import { PasswordService } from '../password/password.service';
 import { JwtService } from '../jwt/jwt.service';
 import { BaseMysqlService } from 'src/base/services/base.service';
+import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 
 @Injectable()
 export class UserService extends BaseMysqlService<UserEntity> {
@@ -14,6 +15,7 @@ export class UserService extends BaseMysqlService<UserEntity> {
     private usersRepository: Repository<UserEntity>,
     private readonly passwordService: PasswordService,
     private readonly jwtService: JwtService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) {
     super(usersRepository);
   }
@@ -38,10 +40,13 @@ export class UserService extends BaseMysqlService<UserEntity> {
     };
 
     const newUser = await this.createOne(userPayload);
+    const token = this.getUserToken(newUser);
+    const refreshToken = await this.getUserRefreshToken(newUser);
 
     return {
       ...newUser,
-      token: this.getUserToken(newUser),
+      token,
+      refreshToken,
     };
   }
 
@@ -58,5 +63,44 @@ export class UserService extends BaseMysqlService<UserEntity> {
       email: user.email.toLowerCase(),
       name: user.name,
     });
+  }
+
+  public async getUserRefreshToken(user: UserEntity): Promise<string> {
+    return await this.refreshTokenService.createRefreshToken(user.id);
+  }
+
+  async refreshUserToken(refreshToken: string) {
+    const token = await this.refreshTokenService.findOne({
+      where: {
+        and: [
+          {
+            token: refreshToken,
+          },
+        ],
+      },
+    });
+
+    if (!token) {
+      throw new Error('Invalid refresh token');
+    }
+
+    const user = await this.findOne({
+      where: {
+        and: [
+          {
+            id: token.userId,
+          },
+        ],
+      },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return {
+      token: this.getUserToken(user),
+      refreshToken: await this.getUserRefreshToken(user),
+    };
   }
 }

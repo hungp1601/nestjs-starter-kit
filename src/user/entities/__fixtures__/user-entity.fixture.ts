@@ -5,4 +5,7 @@ export const mockUserEntity: UserEntity = {
   email: 'email',
   name: 'fName',
   password: 'password',
+  created_at: new Date(),
+  updated_at: new Date(),
+  deleted_at: null,
 };
