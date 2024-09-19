@@ -13,7 +13,6 @@ import { LoggerModule } from './logger/logger.module';
 import { AsyncStorageMiddleware } from './global/middleware/async-storage/async-storage.middleware';
 import { GlobalModule } from './global/global.module';
 import { HealthModule } from './health/health.module';
-import { IsUserEmailExists } from './user/validators/user.validator';
 import { APP_INTERCEPTOR, Reflector } from '@nestjs/core';
 
 const modules = [UserModule];

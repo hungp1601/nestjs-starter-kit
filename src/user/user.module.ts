@@ -12,7 +12,6 @@ import { AppCacheModule } from '../app-cache/app-cache.module';
 import { RefreshTokenService } from './services/refresh-token/refresh-token.service';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { IsUserEmailExists } from './validators/user.validator';
-// import { IsUserEmailExists } from './validators/user.validator';
 
 @Module({
   imports: [
@@ -36,7 +35,6 @@ import { IsUserEmailExists } from './validators/user.validator';
     AuthService,
     RefreshTokenService,
     PasswordService,
-    IsUserEmailExists,
   ],
 })
 export class UserModule {}
