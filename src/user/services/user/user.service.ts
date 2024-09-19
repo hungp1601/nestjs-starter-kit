@@ -70,37 +70,6 @@ export class UserService extends BaseMysqlService<UserEntity> {
   }
 
   async refreshUserToken(refreshToken: string) {
-    const token = await this.refreshTokenService.findOne({
-      where: {
-        and: [
-          {
-            token: refreshToken,
-          },
-        ],
-      },
-    });
-
-    if (!token) {
-      throw new Error('Invalid refresh token');
-    }
-
-    const user = await this.findOne({
-      where: {
-        and: [
-          {
-            id: token.userId,
-          },
-        ],
-      },
-    });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    return {
-      token: this.getUserToken(user),
-      refreshToken: await this.getUserRefreshToken(user),
-    };
+    return await this.refreshTokenService.refreshNewToken(refreshToken);
   }
 }

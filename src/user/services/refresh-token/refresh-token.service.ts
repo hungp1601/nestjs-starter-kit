@@ -1,15 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BaseMysqlService } from 'src/base/services/base.service';
 import { RefreshTokenEntity } from 'src/user/entities/refresh-token.entity';
 import * as crypto from 'crypto-js';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class RefreshTokenService extends BaseMysqlService<RefreshTokenEntity> {
   constructor(
     @InjectRepository(RefreshTokenEntity)
     private refreshTokenEntity: Repository<RefreshTokenEntity>,
+    @Inject(forwardRef(() => UserService))
+    private readonly userService: UserService,
   ) {
     super(refreshTokenEntity);
   }
@@ -28,13 +31,22 @@ export class RefreshTokenService extends BaseMysqlService<RefreshTokenEntity> {
     return token;
   }
 
-  public async generateNewToken(token: string) {
+  public async refreshNewToken(token: string) {
     try {
       const refreshToken = await this.findOne({
         where: {
           and: [
             {
               token,
+            },
+          ],
+        },
+      });
+      const user = await this.userService.findOne({
+        where: {
+          and: [
+            {
+              id: refreshToken!.userId,
             },
           ],
         },
@@ -48,7 +60,18 @@ export class RefreshTokenService extends BaseMysqlService<RefreshTokenEntity> {
         throw new Error('Token expired');
       }
 
-      return this.createRefreshToken(refreshToken.userId);
+      if (refreshToken.isUsed) {
+        throw new Error('Token already used');
+      }
+
+      const newRefreshToken = this.createRefreshToken(refreshToken.userId);
+      const newToken = await this.userService.getUserToken(user!);
+
+      return {
+        user,
+        token: newToken,
+        refreshToken: newRefreshToken,
+      };
     } catch (e) {
       throw new Error('Invalid token' + e.message);
     }

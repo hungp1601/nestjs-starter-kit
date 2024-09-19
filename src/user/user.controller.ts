@@ -43,7 +43,15 @@ export class UserController {
   @UseInterceptors(CacheInterceptor)
   @Get()
   async getUsers() {
-    console.log('Fetching users');
+    const users = await this.userService.findAll({});
+
+    return {
+      users,
+    };
+  }
+
+  @Post()
+  async refreshNewToken() {
     const users = await this.userService.findAll({});
 
     return {

@@ -11,6 +11,7 @@ import { JwtStrategy } from './services/auth/strategies/jwt/jwt.strategy';
 import { AppCacheModule } from '../app-cache/app-cache.module';
 import { RefreshTokenService } from './services/refresh-token/refresh-token.service';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
+import { IsUserEmailExists } from './validators/user.validator';
 
 @Module({
   imports: [
@@ -21,11 +22,20 @@ import { RefreshTokenEntity } from './entities/refresh-token.entity';
   controllers: [UserController],
   providers: [
     AuthService,
-    RefreshTokenService,
     UserService,
+    RefreshTokenService,
     PasswordService,
     JwtService,
     JwtStrategy,
+    IsUserEmailExists,
+  ],
+  exports: [
+    UserService,
+    AuthService,
+    AuthService,
+    RefreshTokenService,
+    PasswordService,
+    IsUserEmailExists,
   ],
 })
 export class UserModule {}

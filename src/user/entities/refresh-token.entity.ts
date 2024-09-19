@@ -20,4 +20,7 @@ export class RefreshTokenEntity extends BaseMysqlEntity {
 
   @Column()
   expiresAt: Date;
+
+  @Column({ default: false })
+  isUsed: boolean;
 }

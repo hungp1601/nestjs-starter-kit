@@ -16,6 +16,10 @@
     "noFallthroughCasesInSwitch": false,
     "strictNullChecks": true,
     "noImplicitAny": true,
-    "strictBindCallApply": true
+    "strictBindCallApply": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@Base/*": ["src/Base/*"]
+    }
   }
 }
