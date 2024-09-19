@@ -334,7 +334,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
   convertToWhereTypeORM(where: WhereOperators) {
     const dataFilter: FindOptionsWhere<E>[] = [];
     const andData: any = {};
-    const orData: any[] = [];
+    // const orData: any[] = [];
     for (const query in where) {
       if (query === 'and') {
         for (const item of where[query] as QueryOperator[]) {

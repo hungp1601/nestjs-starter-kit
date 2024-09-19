@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../../entities/user.entity';
 import { Repository } from 'typeorm';
@@ -15,6 +15,7 @@ export class UserService extends BaseMysqlService<UserEntity> {
     private usersRepository: Repository<UserEntity>,
     private readonly passwordService: PasswordService,
     private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => RefreshTokenService))
     private readonly refreshTokenService: RefreshTokenService,
   ) {
     super(usersRepository);
