@@ -45,7 +45,7 @@ export class UserService extends BaseMysqlService<UserEntity> {
     const refreshToken = await this.getUserRefreshToken(newUser);
 
     return {
-      ...newUser,
+      user: newUser,
       token,
       refreshToken,
     };

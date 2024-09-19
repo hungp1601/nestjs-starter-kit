@@ -14,7 +14,7 @@ export class IsUserEmailExists implements ValidatorConstraintInterface {
   async validate(value: string) {
     try {
       const user = await this.userService.isUserExists(value);
-      if (!user) {
+      if (user) {
         return false;
       }
     } catch (e) {

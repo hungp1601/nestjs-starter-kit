@@ -44,9 +44,8 @@ const modules = [UserModule];
         });
       },
     },
-    IsUserEmailExists,
   ],
-  exports: [...modules, IsUserEmailExists],
+  exports: [...modules],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

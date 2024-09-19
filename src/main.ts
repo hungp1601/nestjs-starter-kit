@@ -5,6 +5,7 @@ import { AppLoggerService } from './logger/services/app-logger/app-logger.servic
 import { json } from 'body-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,6 +29,8 @@ async function bootstrap() {
 
   const logger = app.get(AppLoggerService);
   app.useLogger(logger);
+
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   // API docs
   const config = new DocumentBuilder()
