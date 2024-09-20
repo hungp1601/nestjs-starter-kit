@@ -5,7 +5,10 @@ import {
   IsString,
   Validate,
 } from 'class-validator';
-import { IsUserEmailExists } from '../validators/user.validator';
+import {
+  IsUserEmailExists,
+  IsValidPassword,
+} from '../validators/user.validator';
 
 export class CreateUserDto {
   @IsString()
@@ -18,5 +21,6 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
+  @Validate(IsValidPassword)
   password: string;
 }

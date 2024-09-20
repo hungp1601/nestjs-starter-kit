@@ -17,7 +17,7 @@ export class RefreshTokenService extends BaseMysqlService<RefreshTokenEntity> {
     super(refreshTokenEntity);
   }
 
-  public async createRefreshToken(userId: number) {
+  public async createRefreshToken(userId: number): Promise<string> {
     const token = crypto.SHA256(`${userId}-${new Date().getTime()}`).toString(); // generate a random token
     const expiresAt = new Date();
     expiresAt.setTime(expiresAt.getTime() + 1000 * 60 * 60 * 24 * 7); // 7 days from now

@@ -11,7 +11,10 @@ import { JwtStrategy } from './services/auth/strategies/jwt/jwt.strategy';
 import { AppCacheModule } from '../app-cache/app-cache.module';
 import { RefreshTokenService } from './services/refresh-token/refresh-token.service';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
-import { IsUserEmailExists } from './validators/user.validator';
+import {
+  IsUserEmailExists,
+  IsValidPassword,
+} from './validators/user.validator';
 
 @Module({
   imports: [
@@ -28,6 +31,7 @@ import { IsUserEmailExists } from './validators/user.validator';
     JwtService,
     JwtStrategy,
     IsUserEmailExists,
+    IsValidPassword,
   ],
   exports: [
     UserService,

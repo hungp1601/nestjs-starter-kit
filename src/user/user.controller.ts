@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -56,13 +58,37 @@ export class UserController {
     };
   }
 
-  @Post()
+  @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
   async refreshNewToken(@Body() body: RefreshTokenDto) {
-    const users = await this.userService.findAll({});
+    const response = await this.authService.refreshToken(body.token);
 
-    return {
-      users,
-    };
+    return response;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async me(@Req() req: any) {
+    const user = req.user;
+
+    const res = await this.userService.findOne({
+      where: {
+        and: [{ id: user.id }],
+      },
+    });
+
+    return res;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@Body() body: ChangePasswordDto, @Req() req: any) {
+    console.log(req.user);
+    // const response = await this.authService.changePassword(body);
+
+    // return response;
   }
 }

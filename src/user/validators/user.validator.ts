@@ -27,3 +27,24 @@ export class IsUserEmailExists implements ValidatorConstraintInterface {
     return `User with email ${args.value} existed`;
   }
 }
+
+@Injectable()
+@ValidatorConstraint({ name: 'IsValidPassword' })
+export class IsValidPassword implements ValidatorConstraintInterface {
+  validate(value: string) {
+    if (
+      value.length < 8 ||
+      !/[a-z]/.test(value) ||
+      !/[A-Z]/.test(value) ||
+      !/[0-9]/.test(value)
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  defaultMessage() {
+    return `Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number`;
+  }
+}
