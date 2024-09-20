@@ -63,9 +63,22 @@ export class RefreshTokenService extends BaseMysqlService<RefreshTokenEntity> {
       if (refreshToken.isUsed) {
         throw new Error('Token already used');
       }
-
-      const newRefreshToken = this.createRefreshToken(refreshToken.userId);
-      const newToken = await this.userService.getUserToken(user!);
+      const [newRefreshToken, newToken] = await Promise.all([
+        this.createRefreshToken(refreshToken.userId),
+        this.userService.getUserToken(user!),
+        await this.updateOne({
+          where: {
+            and: [
+              {
+                id: refreshToken.id,
+              },
+            ],
+          },
+          entity: {
+            isUsed: true,
+          },
+        }),
+      ]);
 
       return {
         user,

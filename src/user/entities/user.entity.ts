@@ -13,5 +13,6 @@ export class UserEntity extends BaseMysqlEntity {
   email: string;
 
   @Exclude()
+  @Column()
   password: string;
 }

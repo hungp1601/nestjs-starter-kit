@@ -10,11 +10,9 @@ export abstract class BaseMysqlEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Exclude()
   @CreateDateColumn()
   created_at: Date | null;
 
-  @Exclude()
   @UpdateDateColumn()
   updated_at: Date | null;
 

@@ -18,6 +18,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { User } from '@/global/decorator/current-user.decorator';
+import { UserEntity } from './entities/user.entity';
 
 @ApiTags('user')
 @Controller('user')
@@ -37,12 +39,8 @@ export class UserController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() login: LoginDto) {
-    const token = await this.authService.login(login);
-
-    return {
-      token,
-    };
+  login(@Body() login: LoginDto) {
+    return this.authService.login(login);
   }
 
   @ApiBearerAuth()
@@ -69,8 +67,8 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async me(@Req() req: any) {
-    const user = req.user;
+  async me(@User() req: UserEntity) {
+    const user = req;
 
     const res = await this.userService.findOne({
       where: {
@@ -85,10 +83,12 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
-  async changePassword(@Body() body: ChangePasswordDto, @Req() req: any) {
-    console.log(req.user);
-    // const response = await this.authService.changePassword(body);
+  async changePassword(
+    @Body() body: ChangePasswordDto,
+    @User() user: UserEntity,
+  ) {
+    const response = await this.userService.changePassword(body, user);
 
-    // return response;
+    return response;
   }
 }
