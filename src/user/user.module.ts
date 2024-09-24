@@ -15,10 +15,11 @@ import {
   IsUserEmailExists,
   IsValidPassword,
 } from './validators/user.validator';
+import { Profile } from './entities/profile.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, RefreshTokenEntity]),
+    TypeOrmModule.forFeature([UserEntity, RefreshTokenEntity, Profile]),
     ConfigModule,
     AppCacheModule,
   ],

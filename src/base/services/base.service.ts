@@ -44,10 +44,24 @@ export class BaseMysqlService<E extends ObjectLiteral> {
    * @param id - The ID of the record to find.
    * @returns A promise that resolves to the found record, or undefined if not found.
    */
-  findOneById(id: string) {
+  findOneById(
+    id: number,
+    {
+      join = [],
+      select = [],
+      withDeleted = false,
+      cache = true,
+    }: FindOneOperators = {},
+  ) {
+    const selectType = this.convertFieldsToTypeORM(select);
+    const joinType = this.convertToJoinTypeORM(join);
+
     return this.repository.findOne({
       where: { id: id as any },
-      cache: true,
+      relations: joinType,
+      select: selectType,
+      cache,
+      withDeleted,
     });
   }
 
@@ -155,7 +169,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     }
   }
 
-  async deleteOneById({ id }: { id: string }, hardDelete: boolean = false) {
+  async deleteOneById(id: number, hardDelete: boolean = false) {
     try {
       const entity = await this.findOneById(id);
       if (!entity) {
@@ -313,7 +327,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
    * @returns A promise that resolves to the updated entity, or undefined if the entity was not found.
    * @throws BadRequestException if the update operation fails.
    */
-  async updateOneById(id: string, entity: E): Promise<E | undefined> {
+  async updateOneById(id: number, entity: E): Promise<E | undefined> {
     try {
       const update = await this.repository.update(
         { id: id as any },

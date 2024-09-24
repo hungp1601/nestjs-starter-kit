@@ -22,12 +22,14 @@ export class ConversationsController {
 
   @Get('/')
   async index() {
-    return this.conversationService.findAll(['users']);
+    return this.conversationService.findAll({
+      join: ['users'],
+    });
   }
 
   @Get('/:id')
-  async getById(@Param() params: ParamId): Promise<Conversation> {
-    const Conversation = await this.conversationService.findById(
+  async getById(@Param() params: ParamId) {
+    const Conversation = await this.conversationService.findOneById(
       parseInt(params.id, 10),
     );
     this.throwConversationNotFound(Conversation);
@@ -35,40 +37,33 @@ export class ConversationsController {
   }
 
   @Post('/')
-  async create(@Body() inputs: Conversation): Promise<Conversation> {
+  async create(@Body() inputs: Conversation) {
     return await this.conversationService.create(inputs);
   }
 
   @Put('/:id')
-  async update(
-    @Param() params: ParamId,
-    @Body() inputs: Conversation,
-  ): Promise<Conversation> {
-    const Conversation = await this.conversationService.findById(
-      parseInt(params.id, 0),
-    );
-    this.throwConversationNotFound(Conversation);
-    return await this.conversationService.update(Conversation, inputs);
+  async update(@Param() params: ParamId, @Body() inputs: Conversation) {
+    const id = parseInt(params.id, 0);
+    return await this.conversationService.updateOneById(id, inputs);
   }
 
   @Delete('/:id')
-  async delete(@Param() params: ParamId): Promise<boolean> {
-    const Conversation = await this.conversationService.findById(
-      parseInt(params.id, 0),
-    );
-    this.throwConversationNotFound(Conversation);
-    return await this.conversationService.deleteById(parseInt(params.id, 10));
+  async delete(@Param() params: ParamId) {
+    const id = parseInt(params.id, 0);
+    return await this.conversationService.deleteOneById(id);
   }
 
   @Get('socket/:id')
   async getDataInformation(@Param() params: ParamId): Promise<any> {
-    const conversation = await this.conversationService.findById(
+    const conversation = await this.conversationService.findOneById(
       parseInt(params.id, 10),
-      ['users'],
+      {
+        join: ['users'],
+      },
     );
 
-    const userId = [];
-    conversation.users.map((user) => {
+    const userId: number[] = [];
+    conversation?.users?.map((user) => {
       userId.push(user.id);
       return user;
     });
@@ -76,7 +71,7 @@ export class ConversationsController {
     return userId;
   }
 
-  throwConversationNotFound(Conversation: Conversation) {
+  throwConversationNotFound(Conversation: Conversation | null) {
     if (!Conversation) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }
