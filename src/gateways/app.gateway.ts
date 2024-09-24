@@ -12,6 +12,7 @@ import { WsGuard } from './guards/validation';
 import { MessagesInterface } from './interfaces/messages.interface';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '@/user/services/user/user.service';
+import { ConversationsService } from '@/conversation/services/conversations.service';
 
 @UseGuards(WsGuard)
 @WebSocketGateway(3006, { cors: true })
