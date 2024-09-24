@@ -14,8 +14,17 @@ import { AsyncStorageMiddleware } from './global/middleware/async-storage/async-
 import { GlobalModule } from './global/global.module';
 import { HealthModule } from './health/health.module';
 import { APP_INTERCEPTOR, Reflector } from '@nestjs/core';
+import { ConversationsModule } from './conversation/conversations.module';
 
-const modules = [UserModule];
+const modules = [
+  UserModule,
+  ConversationsModule,
+  DbModule,
+  AppCacheModule,
+  ConfigModule,
+  LoggerModule,
+  HealthModule,
+];
 
 @Global()
 @Module({
@@ -26,11 +35,6 @@ const modules = [UserModule];
       load: [getConfig],
       isGlobal: true,
     }),
-    DbModule,
-    AppCacheModule,
-    ConfigModule,
-    LoggerModule,
-    HealthModule,
     ...modules,
   ],
   providers: [
