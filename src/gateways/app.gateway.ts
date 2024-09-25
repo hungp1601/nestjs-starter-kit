@@ -13,6 +13,11 @@ import { MessagesInterface } from './interfaces/messages.interface';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '@/user/services/user/user.service';
 import { ConversationsService } from '@/conversation/services/conversations.service';
+import { TypeInformation } from '@/conversation/interfaces/information.interface';
+import { InformationService } from '@/conversation/services/information.service';
+import { MessagesService } from '@/conversation/services/messages.service';
+import { UserConversationService } from '@/conversation/services/user-conversation.service';
+import { UserEntity } from '@/user/entities/user.entity';
 
 @UseGuards(WsGuard)
 @WebSocketGateway(3006, { cors: true })
@@ -38,14 +43,12 @@ export class AppGateway
     this.logger.log(client.id, 'Connected..............................');
     const user: UserEntity = await this.getDataUserFromToken(client);
 
-    const information: SaveInformationDto = {
+    await this.informationService.createOne({
       user_id: user.id,
       type: TypeInformation.socket_id,
       status: false,
       value: client.id,
-    };
-
-    await this.informationService.create(information);
+    });
     // need handle insert socketId to information table
     // client.on('room', (room) => {
     //   client.join(room);
@@ -62,13 +65,15 @@ export class AppGateway
 
   @SubscribeMessage('messages')
   async messages(client: Socket, payload: MessagesInterface) {
-    const conversation = await this.conversationService.findById(
+    const conversation = await this.conversationService.findOneById(
       payload.conversation_id,
-      ['users'],
+      {
+        join: ['users'],
+      },
     );
 
     const userId: any[] = [];
-    conversation.users.map((user: { id: any }) => {
+    conversation?.users?.map((user: { id: any }) => {
       userId.push(user.id);
 
       return user;
@@ -76,13 +81,13 @@ export class AppGateway
 
     const dataSocketId = await this.informationService.findSocketId(userId);
 
-    const message = await this.messageService.create({
+    const message = await this.messageService.createOne({
       user_id: payload.user_id,
       status: false,
       message: payload.message,
       conversation_id: payload.conversation_id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      created_at: new Date(),
+      updated_at: new Date(),
     });
 
     const dataUserConversation =
@@ -95,7 +100,7 @@ export class AppGateway
       typeof message.id === 'string' ? parseInt(message.id) : message.id;
 
     await this.userConversationService.updateLastMessageId(
-      dataUserConversation,
+      dataUserConversation!,
       messageId,
     );
 

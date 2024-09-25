@@ -18,6 +18,9 @@ import { ChangePasswordDto } from '@/user/dto/change-password.dto';
 
 @Injectable()
 export class UserService extends BaseMysqlService<UserEntity> {
+  getUserByEmail(email: any): UserEntity | PromiseLike<UserEntity> {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     @InjectRepository(UserEntity)
     private usersRepository: Repository<UserEntity>,

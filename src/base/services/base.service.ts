@@ -327,7 +327,10 @@ export class BaseMysqlService<E extends ObjectLiteral> {
    * @returns A promise that resolves to the updated entity, or undefined if the entity was not found.
    * @throws BadRequestException if the update operation fails.
    */
-  async updateOneById(id: number, entity: E): Promise<E | undefined> {
+  async updateOneById(
+    id: number,
+    entity: DeepPartial<E>,
+  ): Promise<E | undefined> {
     try {
       const update = await this.repository.update(
         { id: id as any },
