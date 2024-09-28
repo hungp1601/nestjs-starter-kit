@@ -9,8 +9,8 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { UserConversationEntity } from './serializers/user-conversation.serializer';
-import { UserConversationService } from './user-conversation.service';
+import { UserConversationService } from './services/user-conversation.service';
+import { ParamId } from '@/base/types/params-id';
 import { UserConversation } from './entities/user-conversation.entity';
 import { UpdateLastMessage } from './interfaces/user-conversation.interface';
 
@@ -22,41 +22,32 @@ export class UserConversationController {
 
   @Get('/')
   async index() {
-    return this.userConversationService.findAll();
+    return this.userConversationService.findAll({});
   }
 
   @Get('/:id')
-  async getById(@Param() params): Promise<UserConversationEntity> {
-    const UserConversation = await this.userConversationService.findById(
-      params.id,
+  async getById(@Param() params: ParamId) {
+    const UserConversation = await this.userConversationService.findOneById(
+      parseInt(params.id, 10),
     );
-    this.throwUserConversationNotFound(UserConversation);
     return UserConversation;
   }
 
   @Post('/')
-  async create(
-    @Body() inputs: UserConversation,
-  ): Promise<UserConversationEntity> {
+  async create(@Body() inputs: UserConversation) {
     return await this.userConversationService.create(inputs);
   }
 
   @Put('/:id')
-  async update(
-    @Param() params,
-    @Body() inputs: UserConversation,
-  ): Promise<UserConversationEntity> {
-    const UserConversation = await this.userConversationService.findById(
+  async update(@Param() params: ParamId, @Body() inputs: UserConversation) {
+    return await this.userConversationService.updateOneById(
       parseInt(params.id, 0),
+      inputs,
     );
-    this.throwUserConversationNotFound(UserConversation);
-    return await this.userConversationService.update(UserConversation, inputs);
   }
 
   @Put('update/last-message')
-  async updateLastMessageId(
-    @Body() inputs: UpdateLastMessage,
-  ): Promise<UserConversationEntity> {
+  async updateLastMessageId(@Body() inputs: UpdateLastMessage) {
     const userConversation =
       await this.userConversationService.findDataUserConversation(
         inputs.user_id,
@@ -70,20 +61,18 @@ export class UserConversationController {
       inputs.message_id,
     );
     console.log(result);
-    
+
     return result;
   }
 
   @Delete('/:id')
-  async delete(@Param() params): Promise<boolean> {
-    const UserConversation = await this.userConversationService.findById(
-      parseInt(params.id, 0),
+  async delete(@Param() params: ParamId) {
+    return await this.userConversationService.deleteOneById(
+      parseInt(params.id, 10),
     );
-    this.throwUserConversationNotFound(UserConversation);
-    return await this.userConversationService.deleteById(params.id);
   }
 
-  throwUserConversationNotFound(UserConversation: UserConversationEntity) {
+  throwUserConversationNotFound(UserConversation: UserConversation | null) {
     if (!UserConversation) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }

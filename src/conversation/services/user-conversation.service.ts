@@ -18,10 +18,13 @@ export class UserConversationService extends BaseMysqlService<UserConversation> 
   }
 
   async updateLastMessageId(
-    entity: UserConversation,
+    entity: UserConversation | null,
     last_messages_id: number,
     relations: string[] = [],
-  ): Promise<UserConversation | null> {
+  ) {
+    if (!entity) {
+      return new NotFoundException('Model not found');
+    }
     return await this.updateOneById(entity.id, {
       ...entity,
       last_message_id: last_messages_id,
