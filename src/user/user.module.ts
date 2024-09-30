@@ -16,6 +16,8 @@ import {
   IsValidPassword,
 } from './validators/user.validator';
 import { Profile } from './entities/profile.entity';
+import { ProfilesController } from './profiles.controller';
+import { ProfilesService } from './services/profile/profiles.service';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { Profile } from './entities/profile.entity';
     ConfigModule,
     AppCacheModule,
   ],
-  controllers: [UserController],
+  controllers: [UserController, ProfilesController],
   providers: [
     AuthService,
     UserService,
@@ -33,6 +35,7 @@ import { Profile } from './entities/profile.entity';
     JwtStrategy,
     IsUserEmailExists,
     IsValidPassword,
+    ProfilesService,
   ],
   exports: [
     UserService,
@@ -40,6 +43,8 @@ import { Profile } from './entities/profile.entity';
     AuthService,
     RefreshTokenService,
     PasswordService,
+    ProfilesService,
+    JwtService,
   ],
 })
 export class UserModule {}

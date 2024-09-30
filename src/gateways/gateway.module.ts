@@ -6,4 +6,4 @@ import { AppGateway } from './app.gateway';
   providers: [AppGateway],
   controllers: [],
 })
-export class GatewayModules {}
+export class GatewayModule {}

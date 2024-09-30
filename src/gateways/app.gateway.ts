@@ -112,8 +112,8 @@ export class AppGateway
         conversation_id: message.conversation_id,
         user_id: message.user_id,
         status: message.status,
-        createdAt: message.createdAt,
-        updatedAt: message.updatedAt,
+        createdAt: message.created_at,
+        updatedAt: message.updated_at,
       });
     });
 

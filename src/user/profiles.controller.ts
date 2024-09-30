@@ -1,5 +1,5 @@
 import { ParamId } from '@/base/types/params-id';
-import { ProfilesService } from '@/conversation/services/profiles.service';
+import { ProfilesService } from '@/user/services/profile/profiles.service';
 import {
   Get,
   Put,

@@ -24,6 +24,4 @@ export class Message extends BaseMysqlEntity {
   @ManyToOne(() => Conversation, (conversation) => conversation.messages)
   @JoinColumn({ name: 'conversation_id' })
   conversation?: Conversation;
-  createdAt: any;
-  updatedAt: any;
 }

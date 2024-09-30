@@ -15,15 +15,14 @@ import { GlobalModule } from './global/global.module';
 import { HealthModule } from './health/health.module';
 import { APP_INTERCEPTOR, Reflector } from '@nestjs/core';
 import { ConversationsModule } from './conversation/conversations.module';
+import { GatewayModule } from './gateways/gateway.module';
+import { JwtModule } from '@nestjs/jwt';
 
 const modules = [
   UserModule,
   ConversationsModule,
-  DbModule,
-  AppCacheModule,
-  ConfigModule,
-  LoggerModule,
-  HealthModule,
+
+  // GatewayModule,
 ];
 
 @Global()
@@ -35,6 +34,15 @@ const modules = [
       load: [getConfig],
       isGlobal: true,
     }),
+    JwtModule.register({
+      secret: getConfig().jwtSecret,
+      global: true,
+    }),
+    DbModule,
+    AppCacheModule,
+    ConfigModule,
+    LoggerModule,
+    HealthModule,
     ...modules,
   ],
   providers: [
