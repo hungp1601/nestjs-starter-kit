@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../../entities/user.entity';
@@ -27,6 +28,83 @@ export class UserService extends BaseMysqlService<UserEntity> {
     private readonly refreshTokenService: RefreshTokenService,
   ) {
     super(usersRepository);
+  }
+
+  async findUserAndMessageReadById(id: string, status: number | null) {
+    return await this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.messages', 'messages')
+      .where('messages.status = :status', { status })
+      .andWhere({ id })
+      .getOne();
+  }
+
+  async findAllConversation(user_id: string): Promise<UserEntity | null> {
+    return await this.usersRepository
+      .createQueryBuilder('users')
+      .innerJoinAndSelect('users.conversations', 'conversations')
+      .leftJoinAndSelect('conversations.users', 'usersInConversation')
+      // .leftJoinAndSelect(
+      //   'conversations.messages',
+      //   'messages',
+      //   'messages.conversation_id = conversations.id',
+      // )
+      .innerJoinAndMapOne(
+        'conversations.messages',
+        'conversations.messages',
+        'messages',
+        'messages.conversation_id = conversations.id',
+      )
+      .select([
+        'users',
+        'conversations',
+        'usersInConversation',
+        'userConversation.last_message_id',
+        'messages',
+      ])
+      .innerJoinAndMapOne(
+        'usersInConversation.last_message_id',
+        'usersInConversation.userConversation',
+        'userConversation',
+        'userConversation.conversation_id = conversations.id',
+      )
+      .where('users.id = :id', { id: user_id })
+      .orderBy('messages.id', 'DESC')
+      .getOne()
+      .then((entity) => {
+        if (!entity) {
+          return Promise.reject(new NotFoundException('Model not found'));
+        }
+        return Promise.resolve(entity ? entity : null);
+      });
+  }
+
+  async findAllConversations(user_id: string): Promise<UserEntity | null> {
+    const data = await this.findAllConversation(user_id);
+    if (!data) {
+      return null;
+    }
+
+    data.conversations = data.conversations
+      ? data.conversations.map((conversation: any) => {
+          conversation.users = conversation.users
+            ? conversation.users.map((user: any) => {
+                return {
+                  ...user,
+                  last_message_id:
+                    user?.last_message_id?.last_message_id || null,
+                };
+              })
+            : [];
+
+          conversation.messages = conversation.messages
+            ? [conversation.messages]
+            : [];
+          return conversation;
+        })
+      : [];
+
+    return data;
   }
 
   async isUserExists(email: string) {

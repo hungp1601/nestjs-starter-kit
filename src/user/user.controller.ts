@@ -1,10 +1,14 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
+  Param,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,6 +23,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { User } from '@/global/decorator/current-user.decorator';
 import { UserEntity } from './entities/user.entity';
+import { ParamId } from '@/base/types/params-id';
 
 @ApiTags('user')
 @Controller('user')
@@ -89,5 +94,41 @@ export class UserController {
     const response = await this.userService.changePassword(body, user);
 
     return response;
+  }
+
+  @Get('messages/:id/:status')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
+  async getByIdAndMessageStatus(@Param() params: any) {
+    const user = await this.userService.findUserAndMessageReadById(
+      params.id,
+      params.status,
+    );
+    return user;
+  }
+
+  @Get('conversation/:id')
+  @UseGuards(JwtAuthGuard)
+  async userConversation(@Param() params: ParamId) {
+    const user = await this.userService.findOneById(params.id, {
+      join: ['profile', 'conversations', 'conversations.messages'],
+    });
+
+    this.throwUserNotFound(user);
+    return user;
+  }
+
+  @Get('conversations/get')
+  @UseGuards(JwtAuthGuard)
+  async getAllConversation(@User() request: UserEntity) {
+    const user = await this.userService.findAllConversations(request.id);
+    this.throwUserNotFound(user);
+    return user;
+  }
+
+  throwUserNotFound(user: UserEntity | null) {
+    if (!user) {
+      throw new HttpException("User don't exists", HttpStatus.NOT_FOUND);
+    }
   }
 }

@@ -18,12 +18,7 @@ import { ConversationsModule } from './conversation/conversations.module';
 import { GatewayModule } from './gateways/gateway.module';
 import { JwtModule } from '@nestjs/jwt';
 
-const modules = [
-  UserModule,
-  ConversationsModule,
-
-  // GatewayModule,
-];
+const modules = [UserModule, ConversationsModule];
 
 @Global()
 @Module({
@@ -43,6 +38,7 @@ const modules = [
     ConfigModule,
     LoggerModule,
     HealthModule,
+    GatewayModule,
     ...modules,
   ],
   providers: [
