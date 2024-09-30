@@ -19,7 +19,11 @@ import { MessagesService } from '@/conversation/services/messages.service';
 import { UserConversationService } from '@/conversation/services/user-conversation.service';
 
 @UseGuards(WsGuard)
-@WebSocketGateway(3006, { cors: true })
+@WebSocketGateway(3006, {
+  cors: {
+    origin: '*',
+  },
+})
 export class AppGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {

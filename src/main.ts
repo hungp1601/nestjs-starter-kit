@@ -9,6 +9,7 @@ import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
 
   /*
     Required to be executed before async storage middleware
