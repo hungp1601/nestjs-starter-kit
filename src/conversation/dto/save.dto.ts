@@ -11,7 +11,7 @@ import { TypeInformation } from '../interfaces/information.interface';
 
 export class SaveInformationDto {
   @IsNumber()
-  user_id: number | null;
+  user_id: string | null;
 
   @IsOptional()
   @IsBoolean()

@@ -14,8 +14,10 @@ import { ConversationsService } from './services/conversations.service';
 import { Conversation } from './entities/conversation.entity';
 import { ParamId } from '@/base/types/params-id';
 import { JwtAuthGuard } from '@/user/guards/jwt-auth/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard)
+@ApiTags('conversations')
 @Controller('conversations')
 export class ConversationsController {
   constructor(private readonly conversationService: ConversationsService) {}
@@ -29,9 +31,7 @@ export class ConversationsController {
 
   @Get('/:id')
   async getById(@Param() params: ParamId) {
-    const Conversation = await this.conversationService.findOneById(
-      parseInt(params.id, 10),
-    );
+    const Conversation = await this.conversationService.findOneById(params.id);
     this.throwConversationNotFound(Conversation);
     return Conversation;
   }
@@ -43,26 +43,23 @@ export class ConversationsController {
 
   @Put('/:id')
   async update(@Param() params: ParamId, @Body() inputs: Conversation) {
-    const id = parseInt(params.id, 0);
+    const id = params.id;
     return await this.conversationService.updateOneById(id, inputs);
   }
 
   @Delete('/:id')
   async delete(@Param() params: ParamId) {
-    const id = parseInt(params.id, 0);
+    const id = params.id;
     return await this.conversationService.deleteOneById(id);
   }
 
   @Get('socket/:id')
   async getDataInformation(@Param() params: ParamId): Promise<any> {
-    const conversation = await this.conversationService.findOneById(
-      parseInt(params.id, 10),
-      {
-        join: ['users'],
-      },
-    );
+    const conversation = await this.conversationService.findOneById(params.id, {
+      join: ['users'],
+    });
 
-    const userId: number[] = [];
+    const userId: string[] = [];
     conversation?.users?.map((user) => {
       userId.push(user.id);
       return user;

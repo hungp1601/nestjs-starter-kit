@@ -6,7 +6,7 @@ import { TypeInformation } from '../interfaces/information.interface';
 @Entity({ name: 'information' })
 export class Information extends BaseMysqlEntity {
   @Column({ name: 'user_id', nullable: true })
-  user_id: number | string;
+  user_id: string;
 
   @Column({ name: 'status', default: false })
   status: boolean;

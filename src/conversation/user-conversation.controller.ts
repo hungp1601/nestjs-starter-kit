@@ -13,8 +13,10 @@ import { UserConversationService } from './services/user-conversation.service';
 import { ParamId } from '@/base/types/params-id';
 import { UserConversation } from './entities/user-conversation.entity';
 import { UpdateLastMessage } from './interfaces/user-conversation.interface';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('user-conversation')
+@ApiTags('user-conversation')
 export class UserConversationController {
   constructor(
     private readonly userConversationService: UserConversationService,
@@ -28,7 +30,7 @@ export class UserConversationController {
   @Get('/:id')
   async getById(@Param() params: ParamId) {
     const UserConversation = await this.userConversationService.findOneById(
-      parseInt(params.id, 10),
+      params.id,
     );
     return UserConversation;
   }
@@ -40,10 +42,7 @@ export class UserConversationController {
 
   @Put('/:id')
   async update(@Param() params: ParamId, @Body() inputs: UserConversation) {
-    return await this.userConversationService.updateOneById(
-      parseInt(params.id, 0),
-      inputs,
-    );
+    return await this.userConversationService.updateOneById(params.id, inputs);
   }
 
   @Put('update/last-message')
@@ -67,9 +66,7 @@ export class UserConversationController {
 
   @Delete('/:id')
   async delete(@Param() params: ParamId) {
-    return await this.userConversationService.deleteOneById(
-      parseInt(params.id, 10),
-    );
+    return await this.userConversationService.deleteOneById(params.id);
   }
 
   throwUserConversationNotFound(UserConversation: UserConversation | null) {

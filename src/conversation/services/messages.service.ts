@@ -19,7 +19,7 @@ export class MessagesService extends BaseMysqlService<Message> {
   }
 
   async findAllPaginate(
-    conversation_id: number | string,
+    conversation_id: string,
     take: number | null,
     page: number | null,
     relations: string[] = [],
@@ -28,7 +28,7 @@ export class MessagesService extends BaseMysqlService<Message> {
     const paginate = page || 1;
     const skip = (paginate - 1) * takeRecord;
     const [results, total] = await this.conversationRepository.findAndCount({
-      where: { conversation_id: Number(conversation_id) },
+      where: { conversation_id: conversation_id },
       order: { id: 'DESC' },
       relations,
       take: takeRecord,

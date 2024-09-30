@@ -18,7 +18,7 @@ export class InformationService extends BaseMysqlService<Information> {
     return await this.createOne(inputs);
   }
 
-  async findSocketId(user_ids: number[]) {
+  async findSocketId(user_ids: string[]) {
     return await this.findAll({
       where: {
         and: [
@@ -34,7 +34,7 @@ export class InformationService extends BaseMysqlService<Information> {
     });
   }
 
-  async deleteByValue(user_id: number | string, value: string) {
+  async deleteByValue(user_id: string, value: string) {
     return this.deleteOne({
       where: {
         and: [{ user_id }, { value }],

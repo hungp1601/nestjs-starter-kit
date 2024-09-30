@@ -45,7 +45,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
    * @returns A promise that resolves to the found record, or undefined if not found.
    */
   findOneById(
-    id: number,
+    id: string,
     {
       join = [],
       select = [],
@@ -169,7 +169,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
     }
   }
 
-  async deleteOneById(id: number, hardDelete: boolean = false) {
+  async deleteOneById(id: string, hardDelete: boolean = false) {
     try {
       const entity = await this.findOneById(id);
       if (!entity) {
@@ -328,7 +328,7 @@ export class BaseMysqlService<E extends ObjectLiteral> {
    * @throws BadRequestException if the update operation fails.
    */
   async updateOneById(
-    id: number,
+    id: string,
     entity: DeepPartial<E>,
   ): Promise<E | undefined> {
     try {

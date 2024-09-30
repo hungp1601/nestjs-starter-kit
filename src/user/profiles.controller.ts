@@ -12,7 +12,9 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Profile } from './entities/profile.entity';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('profiles')
 @Controller('profiles')
 export class ProfilesController {
   constructor(private readonly profileService: ProfilesService) {}
@@ -24,7 +26,7 @@ export class ProfilesController {
 
   @Get('/:id')
   async getById(@Param() params: ParamId) {
-    const Profile = await this.profileService.findOneById(Number(params.id));
+    const Profile = await this.profileService.findOneById(params.id);
     this.throwProfileNotFound(Profile);
     return Profile;
   }
@@ -36,12 +38,12 @@ export class ProfilesController {
 
   @Put('/:id')
   async update(@Param() params: ParamId, @Body() inputs: Profile) {
-    return await this.profileService.updateOneById(Number(params.id), inputs);
+    return await this.profileService.updateOneById(params.id, inputs);
   }
 
   @Delete('/:id')
   async delete(@Param() params: ParamId) {
-    return await this.profileService.deleteOneById(Number(params.id));
+    return await this.profileService.deleteOneById(params.id);
   }
 
   throwProfileNotFound(Profile: Profile | null) {

@@ -16,9 +16,11 @@ import { JwtAuthGuard } from '@/user/guards/jwt-auth/jwt-auth.guard';
 import { MessagesService } from './services/messages.service';
 import { ParamId } from '@/base/types/params-id';
 import { MessageListParam } from './interfaces/message.interface';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard)
 @Controller('messages')
+@ApiTags('messages')
 export class MessagesController {
   constructor(private readonly messageService: MessagesService) {}
 
@@ -33,7 +35,7 @@ export class MessagesController {
 
   @Get('/:id')
   async getById(@Param() params: ParamId) {
-    const messageId = parseInt(params.id, 10);
+    const messageId = params.id;
     const message = await this.messageService.findOneById(messageId);
     this.throwMessageNotFound(message);
     return message;
@@ -46,13 +48,13 @@ export class MessagesController {
 
   @Put('/:id')
   async update(@Param() params: ParamId, @Body() inputs: Message) {
-    const messageId = parseInt(params.id, 10);
+    const messageId = params.id;
     return await this.messageService.updateOneById(messageId, inputs);
   }
 
   @Delete('/:id')
   async delete(@Param() params: ParamId) {
-    const messageId = parseInt(params.id, 10);
+    const messageId = params.id;
     return await this.messageService.deleteOneById(messageId);
   }
 

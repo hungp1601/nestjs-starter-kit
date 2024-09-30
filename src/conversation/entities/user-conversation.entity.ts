@@ -6,13 +6,13 @@ import { BaseMysqlEntity } from '@/base/entities/base-mysql.entities';
 @Entity({ name: 'user_conversation' })
 export class UserConversation extends BaseMysqlEntity {
   @Column({ name: 'user_id', nullable: true })
-  user_id: number;
+  user_id: string;
 
   @Column({ name: 'conversation_id', nullable: true })
-  conversation_id: number;
+  conversation_id: string;
 
   @Column({ name: 'last_message_id', nullable: true })
-  last_message_id: number;
+  last_message_id: string;
 
   @Column({ name: 'mute', default: false })
   mute: boolean;

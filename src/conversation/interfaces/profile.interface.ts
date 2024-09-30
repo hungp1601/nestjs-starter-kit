@@ -1,6 +1,6 @@
 export interface IProfile {
-  id: number | string;
-  user_id: number | null;
+  id: string | string;
+  user_id: string | null;
   avatar: string | null;
   address: string | null;
   gender: Gender;

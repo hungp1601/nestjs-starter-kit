@@ -17,7 +17,6 @@ import { TypeInformation } from '@/conversation/interfaces/information.interface
 import { InformationService } from '@/conversation/services/information.service';
 import { MessagesService } from '@/conversation/services/messages.service';
 import { UserConversationService } from '@/conversation/services/user-conversation.service';
-import { UserEntity } from '@/user/entities/user.entity';
 
 @UseGuards(WsGuard)
 @WebSocketGateway(3006, { cors: true })
@@ -41,10 +40,10 @@ export class AppGateway
 
   async handleConnection(client: Socket) {
     this.logger.log(client.id, 'Connected..............................');
-    const user: UserEntity = await this.getDataUserFromToken(client);
+    const user = await this.getDataUserFromToken(client);
 
     await this.informationService.createOne({
-      user_id: user.id,
+      user_id: user?.id,
       type: TypeInformation.socket_id,
       status: false,
       value: client.id,
@@ -57,7 +56,7 @@ export class AppGateway
 
   async handleDisconnect(client: Socket) {
     const user = await this.getDataUserFromToken(client);
-    await this.informationService.deleteByValue(user.id, client.id);
+    await this.informationService.deleteByValue(user!.id, client.id);
 
     // need handle remove socketId to information table
     this.logger.log(client.id, 'Disconnect');
@@ -96,8 +95,7 @@ export class AppGateway
         message.conversation_id,
       );
 
-    const messageId =
-      typeof message.id === 'string' ? parseInt(message.id) : message.id;
+    const messageId = message.id;
 
     await this.userConversationService.updateLastMessageId(
       dataUserConversation!,
@@ -168,12 +166,12 @@ export class AppGateway
     //     io.sockets.socket(socketId).emit('message', 'this is a test');
   }
 
-  async getDataUserFromToken(client: Socket): Promise<UserEntity> {
+  async getDataUserFromToken(client: Socket) {
     const authToken: any = client.handshake?.query?.token;
     try {
       const decoded = this.jwtService.verify(authToken);
 
-      return await this.userService.getUserByEmail(decoded.email); // response to function
+      return await this.userService.isUserExists(decoded.email); // response to function
     } catch (ex) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
     }

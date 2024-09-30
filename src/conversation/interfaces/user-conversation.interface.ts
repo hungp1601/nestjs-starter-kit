@@ -1,6 +1,6 @@
 export interface IUserConversation {
-  id: number;
-  user_id: number | null;
+  id: string;
+  user_id: string | null;
   conversation_id: number | null;
   mute: boolean;
   block: boolean;
@@ -8,7 +8,7 @@ export interface IUserConversation {
 }
 
 export interface UpdateLastMessage {
-  user_id: number;
-  conversation_id: number;
-  message_id: number;
+  user_id: string;
+  conversation_id: string;
+  message_id: string;
 }

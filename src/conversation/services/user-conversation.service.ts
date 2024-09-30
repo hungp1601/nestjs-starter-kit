@@ -19,7 +19,7 @@ export class UserConversationService extends BaseMysqlService<UserConversation> 
 
   async updateLastMessageId(
     entity: UserConversation | null,
-    last_messages_id: number,
+    last_messages_id: string,
     relations: string[] = [],
   ) {
     if (!entity) {
@@ -38,8 +38,8 @@ export class UserConversationService extends BaseMysqlService<UserConversation> 
   }
 
   async findDataUserConversation(
-    user_id: number,
-    conversation_id: number,
+    user_id: string,
+    conversation_id: string,
   ): Promise<UserConversation | null> {
     return this.findOne({
       where: {

@@ -13,7 +13,9 @@ import { InformationService } from './services/information.service';
 import { ParamId } from '@/base/types/params-id';
 import { Information } from './entities/information.entity';
 import { SaveInformationDto } from './dto/save.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('information')
 @Controller('information')
 export class InformationController {
   constructor(private readonly informationService: InformationService) {}
@@ -25,9 +27,7 @@ export class InformationController {
 
   @Get('/:id')
   async getById(@Param() params: ParamId) {
-    const information = await this.informationService.findOneById(
-      Number(params.id),
-    );
+    const information = await this.informationService.findOneById(params.id);
     this.throwInformationNotFound(information);
     return information;
   }
@@ -40,14 +40,14 @@ export class InformationController {
   @Put('/:id')
   async update(@Param() params: ParamId, @Body() inputs: SaveInformationDto) {
     return await this.informationService.updateOneById(
-      parseInt(params.id, 0),
+      params.id,
       inputs as Information,
     );
   }
 
   @Delete('/:id')
   async delete(@Param() params: ParamId) {
-    await this.informationService.deleteOneById(parseInt(params.id, 0));
+    await this.informationService.deleteOneById(params.id);
     return { deleted: true };
   }
 

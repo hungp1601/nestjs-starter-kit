@@ -22,16 +22,16 @@ import { getConfig } from '../services/app-config/configuration';
           autoLoadEntities: true,
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
           subscribers: [__dirname + '/../**/*.subscriber{.ts,.js}'],
-          cache: {
-            type: 'redis',
-            options: {
-              socket: {
-                host: cache.host,
-                port: cache.port,
-                duration: 60 * 1000, // 60 seconds
-              },
-            },
-          },
+          // cache: {
+          //   type: 'redis',
+          //   options: {
+          //     socket: {
+          //       host: cache.host,
+          //       port: cache.port,
+          //       duration: 60 * 1000, // 60 seconds
+          //     },
+          //   },
+          // },
         };
       },
     }),

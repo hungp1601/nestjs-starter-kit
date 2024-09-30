@@ -6,10 +6,10 @@ import { Conversation } from './conversation.entity';
 @Entity({ name: 'messages' })
 export class Message extends BaseMysqlEntity {
   @Column({ name: 'conversation_id', nullable: true })
-  conversation_id: number;
+  conversation_id: string;
 
   @Column({ name: 'user_id', nullable: true })
-  user_id: number;
+  user_id: string;
 
   @Column({ default: false })
   status: boolean;

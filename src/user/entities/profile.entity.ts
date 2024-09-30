@@ -9,7 +9,7 @@ import {
 @Entity({ name: 'profiles' })
 export class Profile extends BaseMysqlEntity {
   @Column({ name: 'user_id', nullable: true })
-  user_id: number;
+  user_id: string;
 
   @Column({ name: 'avatar', nullable: true })
   avatar: string;
