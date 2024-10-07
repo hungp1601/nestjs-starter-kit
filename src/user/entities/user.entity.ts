@@ -55,7 +55,7 @@ export class UserEntity extends BaseMysqlEntity {
   @JoinTable({
     name: 'user_conversation',
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'conversation_id' },
+    inverseJoinColumn: { name: 'conversation_id', referencedColumnName: 'id' },
   })
   conversations: Conversation[];
 }

@@ -18,6 +18,6 @@ export class Information extends BaseMysqlEntity {
   value: string;
 
   @ManyToOne(() => UserEntity, (user) => user.messages)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user?: UserEntity;
 }

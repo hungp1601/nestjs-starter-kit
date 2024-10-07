@@ -18,10 +18,10 @@ export class Message extends BaseMysqlEntity {
   message: string;
 
   @ManyToOne(() => UserEntity, (user) => user.messages)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user?: UserEntity;
 
   @ManyToOne(() => Conversation, (conversation) => conversation.messages)
-  @JoinColumn({ name: 'conversation_id' })
+  @JoinColumn({ name: 'conversation_id', referencedColumnName: 'id' })
   conversation?: Conversation;
 }

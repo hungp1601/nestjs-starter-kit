@@ -21,13 +21,13 @@ export class UserConversation extends BaseMysqlEntity {
   block: boolean;
 
   @ManyToOne(() => UserEntity, (user) => user.userConversation)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user?: UserEntity;
 
   @ManyToOne(
     () => Conversation,
     (conversation) => conversation.userConversation,
   )
-  @JoinColumn({ name: 'conversation_id' })
+  @JoinColumn({ name: 'conversation_id', referencedColumnName: 'id' })
   conversation?: Conversation;
 }

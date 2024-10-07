@@ -43,27 +43,35 @@ export class AppGateway
   }
 
   async handleConnection(client: Socket) {
-    this.logger.log(client.id, 'Connected..............................');
-    const user = await this.getDataUserFromToken(client);
+    try {
+      this.logger.log(client.id, 'Connected..............................');
+      const user = await this.getDataUserFromToken(client);
 
-    await this.informationService.createOne({
-      user_id: user?.id,
-      type: TypeInformation.socket_id,
-      status: false,
-      value: client.id,
-    });
-    // need handle insert socketId to information table
-    // client.on('room', (room) => {
-    //   client.join(room);
-    // });
+      await this.informationService.createOne({
+        user_id: user?.id,
+        type: TypeInformation.socket_id,
+        status: false,
+        value: client.id,
+      });
+      // need handle insert socketId to information table
+      // client.on('room', (room) => {
+      //   client.join(room);
+      // });
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async handleDisconnect(client: Socket) {
-    const user = await this.getDataUserFromToken(client);
-    await this.informationService.deleteByValue(user!.id, client.id);
+    try {
+      const user = await this.getDataUserFromToken(client);
+      await this.informationService.deleteByValue(user!.id, client.id);
 
-    // need handle remove socketId to information table
-    this.logger.log(client.id, 'Disconnect');
+      // need handle remove socketId to information table
+      this.logger.log(client.id, 'Disconnect');
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   @SubscribeMessage('messages')
@@ -173,6 +181,9 @@ export class AppGateway
   async getDataUserFromToken(client: Socket) {
     const authToken: any = client.handshake?.query?.token;
     try {
+      if (!authToken || authToken === 'null') {
+        return null;
+      }
       const decoded = this.jwtService.verify(authToken);
 
       return await this.userService.isUserExists(decoded.email); // response to function

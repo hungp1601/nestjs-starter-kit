@@ -96,6 +96,7 @@ export class UserController {
     return response;
   }
 
+  @ApiBearerAuth()
   @Get('messages/:id/:status')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
@@ -107,6 +108,7 @@ export class UserController {
     return user;
   }
 
+  @ApiBearerAuth()
   @Get('conversation/:id')
   @UseGuards(JwtAuthGuard)
   async userConversation(@Param() params: ParamId) {
@@ -118,6 +120,7 @@ export class UserController {
     return user;
   }
 
+  @ApiBearerAuth()
   @Get('conversations/get')
   @UseGuards(JwtAuthGuard)
   async getAllConversation(@User() request: UserEntity) {

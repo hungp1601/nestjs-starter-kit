@@ -10,7 +10,7 @@ export class RefreshTokenEntity extends BaseMysqlEntity {
   userId: string;
 
   @ManyToOne(() => UserEntity)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: UserEntity;
 
   @Column()
