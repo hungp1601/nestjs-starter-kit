@@ -42,6 +42,9 @@ export class RefreshTokenService extends BaseMysqlService<RefreshTokenEntity> {
           ],
         },
       });
+      if (!refreshToken) {
+        throw new Error('Invalid token');
+      }
       const user = await this.userService.findOne({
         where: {
           and: [
